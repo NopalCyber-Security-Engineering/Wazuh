@@ -1,0 +1,131 @@
+<!-- Local rules -->
+
+<!-- Modify it at your will. -->
+<!-- Copyright (C) 2015, Wazuh Inc. -->
+
+<!-- Example -->
+<group name="local,syslog,sshd,">
+
+  <!--
+  Dec 10 01:02:02 host sshd[1234]: Failed none for root from 1.1.1.1 port 1066 ssh2
+  -->
+  <rule id="100001" level="5">
+    <if_sid>5716</if_sid>
+    <srcip>1.1.1.1</srcip>
+    <description>sshd: authentication failed from IP 1.1.1.1.</description>
+    <group>authentication_failed,pci_dss_10.2.4,pci_dss_10.2.5,</group>
+  </rule>
+
+</group>
+
+<group name="office365,">
+ <rule id="91578" level="3" overwrite="yes">
+   <if_sid>91532</if_sid>
+   <field name="office365.RecordType" type="osregex">^50$</field>
+   <description>Office 365: Events related to the MailItemsAccessed mailbox auditing action.</description>
+   <options>no_full_log</options>
+ </rule>
+ 
+ <rule id="91709" level="3" overwrite="yes">
+   <if_sid>91532</if_sid>
+   <field name="office365.Operation" type="osregex">^Add user.$</field>
+   <description>Office 365: Added user</description>
+   <options>no_full_log</options>
+   <group>AzureActiveDirectory,hipaa_164.312.a.2.I,hipaa_164.312.b,pci_dss_8.1.2,pci_dss_10.6.2</group>
+ </rule>
+ 
+ <rule id="91703" level="3" overwrite="yes">
+   <if_sid>91532</if_sid>
+   <field name="office365.Operation" type="osregex">^PermissionLevelAdded$</field>
+   <description>Office 365: A permission level was added to a site collection.</description>
+   <options>no_full_log</options>
+   <group>OneDrive,SharePoint,hipaa_164.312.a.1,hipaa_164.312.b,pci_dss_10.5.1</group>
+ </rule>
+ 
+ <rule id="91710" level="3" overwrite="yes">
+   <if_sid>91532</if_sid>
+   <field name="office365.Operation" type="osregex">^Update user.$</field>
+   <description>Office 365: Updated user</description>
+   <options>no_full_log</options>
+   <group>AzureActiveDirectory,hipaa_164.312.a.2.I,hipaa_164.312.b,pci_dss_8.1.2,pci_dss_10.6.2</group>
+ </rule>
+ 
+ <rule id="91570" level="3" overwrite="yes">
+   <if_sid>91532</if_sid>
+   <field name="office365.RecordType" type="osregex">^42$</field>
+   <description>Office 365: Events related to insights and reports in the Office 365 security and compliance center.</description>
+   <options>no_full_log</options>
+   <group>SecurityComplianceInsights,hipaa_164.312.b,pci_dss_10.6.1</group>
+ </rule>
+</group>
+
+<group name="ossec,">
+<rule id="533" level="3" overwrite="yes">
+    <if_sid>530</if_sid>
+    <match>ossec: output: 'netstat listening ports</match>
+    <check_diff />
+    <description>Listened ports status (netstat) changed (new port opened or closed).</description>
+    <group>pci_dss_10.2.7,pci_dss_10.6.1,gpg13_10.1,gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_AU.14,nist_800_53_AU.6,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+  </rule>
+</group>
+
+<group name="windows,windows_application,">
+  <rule id="60602" level="3" overwrite="yes">
+    <if_sid>60003</if_sid>
+    <field name="win.system.severityValue">^ERROR$</field>
+    <options>no_full_log</options>
+    <description>Windows application error event.</description>
+    <group>gdpr_IV_35.7.d,gpg13_4.3,system_error,</group>
+  </rule>
+  
+  <rule id="60702" level="3" overwrite="yes">
+    <if_sid>60675</if_sid>
+    <field name="win.system.eventID">^8224$</field>
+    <options>no_full_log</options>
+    <description>The VSS service is shutting down due to idle timeout.</description>
+  </rule>
+  
+  <rule id="60796" level="3" overwrite="yes">
+    <if_sid>60795</if_sid>
+    <field name="win.system.eventID">^103$</field>
+    <options>no_full_log</options>
+    <description>The database engine stopped an instance.</description>
+  </rule>
+  
+</group>
+
+<group name="syslog,access_control,">
+  <rule id="2501" level="3" overwrite="yes">
+    <match>FAILED LOGIN |authentication failure|</match>
+    <match>Authentication failed for|invalid password for|</match>
+    <match>LOGIN FAILURE|auth failure: |authentication error|</match>
+    <match>authinternal failed|Failed to authorize|</match>
+    <match>Wrong password given for|login failed|Auth: Login incorrect|</match>
+    <match>Failed to authenticate user</match>
+    <group>authentication_failed,pci_dss_10.2.4,pci_dss_10.2.5,gpg13_7.8,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.1,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <description>syslog: User authentication failure.</description>
+  </rule>
+</group>
+
+<group name="windows,windows_system,">
+
+  <rule id="61102" level="3" overwrite="yes">
+    <if_sid>60002</if_sid>
+    <field name="win.system.severityValue">^ERROR$</field>
+    <description>Windows System error event</description>
+    <options>no_full_log</options>
+    <group>system_error,gpg13_4.3,gdpr_IV_35.7.d,</group>
+  </rule>
+  
+  <rule id="61107" level="3" overwrite="yes">
+    <if_sid>61102</if_sid>
+    <field name="win.system.eventID">^7031$</field>
+    <field name="win.eventdata.param1">\.+</field>
+    <field name="win.system.providerName">^Service Control Manager$</field>
+    <description>A service terminated unexpectedly on the system</description>
+    <options>no_full_log</options>
+  </rule>
+  
+</group>  
+
+  

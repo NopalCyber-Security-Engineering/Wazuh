@@ -1,0 +1,118 @@
+<group name="trendmicro_apexcentral_av">
+
+  <!-- 116100: Base Rule -->
+  <rule id="116100" level="0">
+    <decoded_as>trendmicro-apexcentral</decoded_as>
+    <description>Trend Micro Apex Central: Log received</description>
+  </rule>
+
+  <!-- 116101: Blocked Intrusions -->
+  <rule id="116101" level="3">
+    <if_sid>116100</if_sid>
+    <field name="threat.type">Intrusion Prevention</field>
+    <field name="device.actioncode">0</field>
+    <field name="device.action">Block</field>
+    <field name="event.severity" type="pcre2">\b([4-9]|\d{2,})\b</field>
+    <description>INTRUSION PREVENTION: High-severity attack attempt blocked</description>
+    <group>intrusion_prevention,critical</group>
+  </rule>
+
+  <!-- 116102: Logged Intrusions -->
+  <rule id="116102" level="3">
+    <if_sid>116100</if_sid>
+    <field name="threat.type">Intrusion Prevention</field>
+    <field name="device.actioncode">1</field>
+    <field name="device.action">Log</field>
+    <description>INTRUSION ATTEMPT: Intrusion attempt detected and logged</description>
+    <group>intrusion_prevention,monitoring</group>
+  </rule>
+
+  <!-- 116103: DLP Violations -->
+  <rule id="116103" level="3">
+    <if_sid>116100</if_sid>
+    <field name="threat.type">Data Loss Prevention</field>
+    <field name="device.actioncode">3</field>
+    <field name="dlp.message" type="pcre2">(Credit Card|SWIFT BIC|IIN|Cardholder Information|Common Medical Terms)</field>
+    <description>CRITICAL DLP VIOLATION: Sensitive data leakage detected</description>
+    <group>dlp,data_exfiltration</group>
+  </rule>
+
+  <!-- 116104: Malware Upload Blocked -->
+  <rule id="116104" level="3">
+    <if_sid>116100</if_sid>
+    <field name="threat.type" type="pcre2">AV:Unable to upload</field>
+    <field name="threat.name" type="pcre2">(WORM_COINMINER|TROJ64_COINMINE|COINMINER|MINER)</field>
+    <description>CRYPTOMINER BLOCKED: Cryptomining malware activity blocked.</description>
+    <group>malware,cryptominer</group>
+  </rule>
+
+  <!-- 116105: Malware Quarantined -->
+  <rule id="116105" level="3">
+    <if_sid>116100</if_sid>
+    <field name="threat.type" type="pcre2">AV:File quarantined</field>
+    <field name="device.action">File quarantined</field>
+    <description>Malware contained: Threat quarantined</description>
+    <group>malware,contained</group>
+  </rule>
+
+  <!-- 116106: Quarantine Failed -->
+  <rule id="116106" level="3">
+    <if_sid>116100</if_sid>
+    <field name="threat.type" type="pcre2">AV:Unable to quarantine</field>
+    <description>EMERGENCY: Failed to quarantine detected threat</description>
+    <group>malware,critical_failure</group>
+  </rule>
+
+  <!-- 116107: No Action Taken on Malware -->
+  <rule id="116107" level="3">
+    <if_sid>116100</if_sid>
+    <field name="threat.type" type="pcre2">AV:No action</field>
+    <description>WARNING: No action taken on detected threat</description>
+    <group>malware,no_action</group>
+  </rule>
+
+  <!-- 116108: Device Control Block -->
+  <rule id="116108" level="3">
+    <if_sid>116100</if_sid>
+    <field name="threat.type" type="pcre2">Device Access Control</field>
+    <field name="device.actioncode">4</field>
+    <description>DEVICE BLOCKED: Unauthorized device access blocked on endpoint</description>
+    <group>device_control,block</group>
+  </rule>
+
+  <!-- 116109: App Control Violation -->
+  <rule id="116109" level="0" noalert="1">
+    <if_sid>116100</if_sid>
+    <field name="threat.type">Endpoint Application Control Violation Information</field>
+    <field name="operation.type">Lockdown</field>
+    <description>APP CONTROL: Application blocked by lockdown policy</description>
+    <group>app_control,lockdown</group>
+  </rule>
+
+  <!-- 116110: High-Risk Behavior -->
+  <rule id="116110" level="3">
+      <if_sid>116100</if_sid>
+    <field name="threat.type">Behavior Monitoring</field>
+    <field name="threat.name">BM:5110</field>  <!-- Optional, use if you want specific ID -->
+    <description>HIGH-RISK BEHAVIOR: Suspicious process activity detected</description>
+    <group>behavior_monitoring,high_risk</group>
+  </rule>
+
+  <!-- 116111: Low-Risk Behavior -->
+    <rule id="116111" level="3">
+    <if_sid>116100</if_sid>
+    <field name="threat.type">Behavior Monitoring</field>
+    <field name="threat.name">BM:100</field>
+    <description>New program blocked by behavior monitoring system</description>
+    <group>behavior_monitoring,low_risk</group>
+  </rule>
+
+  <!-- 116112: Repeated Attacks -->
+  <rule id="116112" level="3">
+    <if_sid>116101</if_sid>
+    <field name="event.count" type="pcre2">\b([6-9]|\d{2,})\b</field>
+    <description>REPEATED ATTACKS: Multiple intrusion attempts detected from the same source</description>
+    <group>bruteforce</group>
+  </rule>
+
+</group>
