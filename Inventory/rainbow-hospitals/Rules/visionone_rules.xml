@@ -1,0 +1,475 @@
+<group name="visionone,syslog,">
+
+  <!-- Base rule: Detect Vision One JSON logs -->
+  <rule id="111000" level="0">
+      <match>schemaVersion</match>
+      <description>Trend Micro Vision One alert detected</description>
+  </rule>
+
+  <!-- Extract severity -->
+  <rule id="111001" level="10">
+      <if_sid>111000</if_sid>
+      <field name="severity">high</field>
+      <description>Vision One high severiy event detected</description>
+  </rule>
+  <rule id="111002" level="12">
+      <if_sid>111000</if_sid>
+      <field name="severity">critical</field>
+      <description>Vision One critical severiy event detected</description>
+  </rule>
+  <rule id="111003" level="5">
+      <if_sid>111000</if_sid>
+      <field name="severity">medium</field>
+      <description>Vision One medium severiy event detected</description>
+  </rule>
+  <rule id="111004" level="5">
+      <if_sid>111000</if_sid>
+      <field name="severity">low</field>
+      <description>Vision One low severiy event detected</description>
+  </rule>
+
+  <rule id="111005" level="12">
+    <if_sid>111000</if_sid>
+    <field name="model">Unusual Execution of Node for Script Invocation</field>
+    <field name="mitreTechniqueIds">T1059.007</field>
+    <description>Vision One: Possible MITRE T1059.007 - Malicious Node.js Script Execution Detected.</description>
+    <mitre>
+      <id>T1059.007</id>
+    </mitre>
+  </rule>
+
+  <rule id="111006" level="10">
+    <if_sid>111000</if_sid>
+    <field name="impactScope.entities.entityValue.name" type="pcre2">\.*</field>
+    <field name="investigationStatus">New</field>
+    <description>Vision One: New Alert on Critical Asset: %impactScope.entities.entityValue.name%</description>
+  </rule>
+  
+  <rule id="111007" level="11">
+    <if_sid>111000</if_sid>
+    <field name="impactScope.entities.entityValue" type="pcre2">(?i)(nt authority\\system|administrator)</field>
+    <description>Vision One: High-Privilege Account (%impactScope.entities.entityValue%) Involved in Suspicious Activity.</description>
+  </rule>
+  
+  <rule id="111008" level="10">
+    <if_sid>111000</if_sid>
+    <field name="score" type="pcre2">8[0-9]|9[0-9]|100</field>
+    <status>Open</status>
+    <description>Vision One: High-Score Alert (%score%) is still Open - Immediate Review Required.</description>
+  </rule>
+  
+  <rule id="111009" level="4">
+    <if_sid>111000</if_sid>
+    <field name="investigationStatus">^Closed$</field>
+    <field name="investigationResult">^No Findings$</field>
+    <description>Vision One: Alert closed with 'No Findings' (False Positive/Non-Malicious).</description>
+  </rule>
+  
+  <rule id="111010" level="14">
+    <if_sid>111000</if_sid>
+    <field name="indicators.value" type="pcre2">(?i)(node_modules/node-update/index.js)</field>
+    <description>Vision One: CRITICAL IOC - Confirmed 'node_modules/node-update/index.js' Execution Path Detected.</description>
+    <options>no_full_log</options>
+  </rule>
+  
+  <rule id="111011" level="10">
+    <if_sid>111000</if_sid>
+    <field name="indicators.type" type="pcre2">^(ip_address|domain)$</field>
+    <field name="severity">high|critical</field>
+    <description>Vision One: High Severity Network IOC Detected (%indicators.value%).</description>
+  </rule>
+  
+  <rule id="111012" level="12">
+    <if_sid>111000</if_sid>
+    <field name="indicators.type" type="pcre2">^(sha256|md5)$</field>
+    <description>Vision One: Malware File Hash IOC Detected (%indicators.value%) - Review for Blocking.</description>
+  </rule>
+  
+  <rule id="111013" level="10">
+    <if_sid>111000</if_sid>
+    <field name="matchedRules.matchedFilters.threatActor" type="pcre2">^(APT28|FIN7|Lazarus)$</field>
+    <description>Vision One: Alert linked to known Threat Actor: %matchedRules.matchedFilters.threatActor%</description>
+    <mitre>
+      <id>TA0010</id> </mitre>
+  </rule>
+  
+  <rule id="111014" level="10">
+    <if_sid>111000</if_sid>
+    <field name="indicators.value" type="pcre2">(?i)(C:\\Users\\.*\\AppData\\Local\\Temp|C:\\Windows\\Temp|C:\\Users\\.*\\Desktop)</field>
+    <description>Vision One: Suspicious file access/creation in high-risk user or temp staging directory.</description>
+  </rule>
+  
+  <rule id="111015" level="13">
+    <if_sid>111000</if_sid>
+    <field name="model" type="pcre2">(?i)(Remote Shell|Command and Control|C2 connection|Lateral Movement)</field>
+    <description>Vision One: CRITICAL - Remote Shell or Command and Control (C2) Activity Model Detected (T1021).</description>
+    <mitre>
+      <id>T1021</id> 
+    </mitre>
+  </rule>
+  
+  <rule id="111016" level="11">
+    <if_sid>111000</if_sid>
+    <field name="indicators.type" type="pcre2">^(file_path|file_name)$</field>
+    <field name="indicators.value" type="pcre2">(?i)\.(ps1|vbs|exe|dll|bat|hta)$</field>
+    <field name="severity" type="pcre2">^(high|critical)$</field>
+    <description>Vision One: High Severity Alert on Suspicious Executable or Script File Type (%indicators.value%).</description>
+  </rule>
+  
+  <rule id="111017" level="13">
+    <if_sid>111000</if_sid>
+    <field name="model" type="pcre2">(?i)^(tampering|disabling security|security feature bypassed|sensor stopped|Impede Defenses)$</field>
+    <description>Vision One: CRITICAL - Possible Impair Defenses Attack (T1562). Security Tampering Attempt Detected.</description>
+    <mitre>
+      <id>T1562</id> 
+    </mitre>
+  </rule>
+  
+  <!-- Attack Flurry Detection (5+ High/Critical Alerts from Same Host in 5 min) 111017, 111018 -->
+  <!-- 
+  <rule id="111017" level="0">
+    <if_sid>111000</if_sid>
+    <same_field type="pcre2">^(impactScope\.entities\.entityValue\.name)$</same_field>
+    <description>Vision One: Base Rule for High Alert Correlation. Tracking Host for Attack Flurry.</description>
+  </rule>
+
+  <rule id="111018" level="12" frequency="5" timeframe="300">
+    <if_matched_sid>111017</if_matched_sid>
+    <description>Vision One: CRITICAL - Attack Flurry Detected: Multiple High/Critical Alerts from Same Host in 5 Minutes.</description>
+    <mitre>
+      <id>T1083</id>
+    </mitre>
+  </rule>
+  
+  -->
+  
+  <rule id="111019" level="14">
+    <if_sid>111000</if_sid>
+    <field name="model" type="pcre2">(?i)^(Credential Dumping|Mimikatz|LSASS Memory|NTDS)$</field>
+    <description>Vision One: CRITICAL - Credential Dumping Attack (T1003) Detected. Immediate Response Required.</description>
+    <mitre>
+      <id>T1003</id>
+    </mitre>
+  </rule>
+  
+  <rule id="111020" level="12">
+    <if_sid>111000</if_sid>
+    <field name="model" type="pcre2">(?i)(Persistence via Authentication Package Registry|Startup Item Modification|New Service Created)</field>
+    <description>Vision One: CRITICAL - Persistence Attempt Detected (T1547.001) via Registry/Startup Item.</description>
+    <mitre>
+      <id>T1547.001</id>
+    </mitre>
+  </rule>
+  
+  <rule id="111021" level="10">
+    <if_sid>111000</if_sid>
+    <field name="model" type="pcre2">(?i)(Screen Capture via CopyFromScreen)</field>
+    <description>Vision One: High Alert - Data Exfiltration (T1113) via Suspicious Screen Capture.</description>
+    <mitre>
+      <id>T1113</id>
+    </mitre>
+  </rule>
+  
+  <rule id="111022" level="8">
+    <if_sid>111000</if_sid>
+    <field name="model" type="pcre2">(?i)^(Network Scanner|Account Discovery|Port Scanning|Lateral Reconnaissance)$</field>
+    <description>Vision One: High Alert - Internal Discovery/Reconnaissance Activity Detected (T1046).</description>
+    <mitre>
+      <id>T1046</id>
+    </mitre>
+  </rule>
+  
+  <rule id="111023" level="13">
+    <if_sid>111000</if_sid>
+    <field name="indicators.value" type="pcre2">(?i)(dropbox\.com|onedrive\.live\.com|googleusercontent\.com|s3\.amazonaws\.com)</field>
+    <description>Vision One: CRITICAL IOC - Direct Exfiltration Attempt to Cloud Storage (%indicators.value%).</description>
+    <mitre>
+      <id>T1567</id>
+    </mitre>
+  </rule>
+  
+  <rule id="111024" level="11">
+    <if_sid>111000</if_sid>
+    <field name="model" type="pcre2">(?i)(Unusual Bitsadmin Activity|Suspicious Certutil Execution|LOLBAS Execution)</field>
+    <description>Vision One: High Alert - Suspicious Living Off The Land Binary (LOLBAS) Execution Detected (T1105/T1059).</description>
+    <mitre>
+      <id>T1105</id>
+      <id>T1059</id>
+    </mitre>
+  </rule>
+  
+  <rule id="111025" level="15">
+    <if_sid>111000</if_sid>
+    <field name="model" type="pcre2">(?i)(Ransomware Encrypted File Creation|Wiper Activity|Disk Manipulation)</field>
+    <description>Vision One: CRITICAL - Confirmed Ransomware or Disk Destruction Activity Detected (T1486/T1490). Host Isolation Required.</description>
+    <mitre>
+      <id>T1486</id>
+      <id>T1490</id>
+    </mitre>
+  </rule>
+  
+  <rule id="111026" level="13">
+    <if_sid>111000</if_sid>
+    <field name="model" type="pcre2">(?i)(Beaconing|DNS Tunneling|Suspicious HTTP Communication|C2 Channel)</field>
+    <description>Vision One: CRITICAL - Command and Control (C2) Communication Detected (T1071).</description>
+    <mitre>
+      <id>T1071</id>
+    </mitre>
+  </rule>
+  
+  <rule id="111027" level="8">
+    <if_sid>111000</if_sid>
+    <field name="model" type="pcre2">(?i)(Network Configuration Discovery|ipconfig execution|Suspicious Network Information Query)</field>
+    <description>Vision One: High Alert - System Network Configuration Discovery Detected (T1016).</description>
+    <mitre>
+      <id>T1016</id>
+    </mitre>
+  </rule>
+  
+  <rule id="111028" level="13">
+    <if_sid>111000</if_sid>
+    <field name="model" type="pcre2">(?i)(Credential From Password Stores|Possible Credential Dumping from Web Browsers)</field>
+    <description>Vision One: CRITICAL - Attempted Credential Harvesting from Password Stores Detected (T1555).</description>
+    <mitre>
+      <id>T1555</id>
+    </mitre>
+  </rule>
+  
+  <rule id="111029" level="13">
+    <if_sid>111000</if_sid>
+    <field name="model" type="pcre2">(?i)(Suspicious Remote WMI|PsExec Lateral Movement|Noteworthy Command Execution from PSEXESVC)</field>
+    <description>Vision One: CRITICAL - Suspicious Lateral Movement Detected via WMI/PsExec (T1021).</description>
+    <mitre>
+      <id>T1021</id>
+    </mitre>
+  </rule>
+  
+  <rule id="111030" level="14">
+    <if_sid>111000</if_sid>
+    <field name="model" type="pcre2">(?i)(Suspicious User Creation|Group Membership Altered|Administrator Group Modification|Unauthorized Account Reset)</field>
+    <description>Vision One: CRITICAL - Unauthorized Account or Group Modification Detected (T1098). Potential Backdoor Creation.</description>
+    <mitre>
+      <id>T1098</id>
+    </mitre>
+  </rule>
+  
+  <rule id="111031" level="10">
+    <if_sid>111000</if_sid>
+    <field name="indicators.value" type="pcre2">(?i)\.(web\.config|rdp|ssh|key|vault)</field>
+    <description>Vision One: High Alert - Access to Sensitive Configuration/Credential Files (%indicators.value%) Detected (T1552.001).</description>
+    <mitre>
+      <id>T1552.001</id>
+    </mitre>
+  </rule>
+  
+  <rule id="111032" level="14">
+    <if_sid>111000</if_sid>
+    <field name="model" type="pcre2">(?i)(Code Injection|Process Hollowing|DLL Injection|Suspicious Memory Write)</field>
+    <description>Vision One: CRITICAL - Suspicious Code Injection Activity Detected (T1055). Evasion Attempt.</description>
+    <mitre>
+      <id>T1055</id>
+    </mitre>
+  </rule>
+  
+</group>
+
+  
+  <!-- Trendmicro Email Security Custom rules by NopalCyber July 2026 -->
+
+<group name="visionone,syslog,trendmicro,email_security,mail,">
+
+  <rule id="111033" level="0">
+    <field name="data.integration">^trendmicro-ems$</field>
+    <description>Trend Micro Email Security event detected</description>
+    <group>trendmicro,email_security,mail,</group>
+  </rule>
+
+  <rule id="111034" level="3">
+    <if_sid>111033</if_sid>
+    <field name="data.trendmicro_ems.action">^Delivered$</field>
+    <description>Trend Micro Email delivered</description>
+    <group>trendmicro,email_security,email_delivery,mail,</group>
+  </rule>  
+
+  <rule id="111035" level="3">
+    <if_sid>111033</if_sid>
+    <field name="data.trendmicro_ems.action">^Bounced$</field>
+    <description>Trend Micro Email bounced</description>
+    <group>trendmicro,email_security,email_delivery,mail,</group>
+  </rule>
+  
+  <rule id="111036" level="3">
+    <if_sid>111033</if_sid>
+    <field name="data.trendmicro_ems.action">^Quarantined$</field>
+    <description>Trend Micro Email quarantined</description>
+    <group>trendmicro,email_security,email_delivery,mail,quarantine,</group>
+    <mitre>
+      <id>T1566</id>
+    </mitre>
+  </rule>
+  
+  <rule id="111037" level="3">
+    <if_sid>111033</if_sid>
+    <field name="data.trendmicro_ems.action" type="pcre2">^(Dropped|Deferred|Rejected)$</field>
+    <description>Trend Micro Email delivery failed or delayed</description>
+    <group>trendmicro,email_security,email_delivery,mail,</group>
+  </rule>
+  
+  <rule id="111038" level="3">
+    <if_sid>111033</if_sid>
+    <field name="data.trendmicro_ems.direction">^in$</field>
+    <description>Trend Micro Email incoming message observed</description>
+    <group>trendmicro,email_security,email_direction,mail,</group>
+  </rule>
+  
+  <rule id="111039" level="3">
+    <if_sid>111033</if_sid>
+    <field name="data.trendmicro_ems.attachments.fileName" type="pcre2">(?i).+</field>
+    <description>Trend Micro Email contains attachment</description>
+    <group>trendmicro,email_security,email_attachment,mail,</group>
+  </rule>
+  
+  <rule id="111040" level="3">
+    <if_sid>111033</if_sid>
+    <field name="data.trendmicro_ems.attachments.fileName" type="pcre2">(?i)^.+\..*,.+\..+$</field>
+    <description>Trend Micro Email contains multiple attachments</description>
+    <group>trendmicro,email_security,email_attachment,mail,</group>
+  </rule>
+  
+  <rule id="111041" level="10">
+    <if_sid>111033</if_sid>
+    <field name="data.trendmicro_ems.attachments.fileName" type="pcre2">(?i)\.(exe|dll|scr|msi|com|pif|cpl)$</field>
+    <description>Trend Micro Email contains executable attachment</description>
+    <group>trendmicro,email_security,email_attachment,mail,suspicious_attachment,</group>
+    <mitre>
+      <id>T1566.001</id>
+      <id>T1204.002</id>
+    </mitre>
+  </rule>
+  
+  <rule id="111042" level="10">
+    <if_sid>111033</if_sid>
+    <field name="data.trendmicro_ems.attachments.fileName" type="pcre2">(?i)\.(js|jse|vbs|vbe|wsf|wsh|hta|ps1|bat|cmd)$</field>
+    <description>Trend Micro Email contains script attachment</description>
+    <group>trendmicro,email_security,email_attachment,mail,suspicious_attachment,</group>
+    <mitre>
+      <id>T1566.001</id>
+      <id>T1204.002</id>
+    </mitre>
+  </rule>
+  
+  <rule id="111043" level="3">
+    <if_sid>111033</if_sid>
+    <field name="data.trendmicro_ems.attachments.fileName" type="pcre2">(?i)\.(zip|rar|7z|gz|tar|iso|img)$</field>
+    <description>Trend Micro Email contains archive attachment</description>
+    <group>trendmicro,email_security,email_attachment,mail,suspicious_attachment,</group>
+    <mitre>
+      <id>T1566.001</id>
+    </mitre>
+  </rule>
+  
+  <rule id="111044" level="3">
+    <if_sid>111033</if_sid>
+    <field name="data.trendmicro_ems.attachments.fileName" type="pcre2">(?i)\.(doc|docx|docm|xls|xlsx|xlsm|ppt|pptx|pptm|rtf)$</field>
+    <description>Trend Micro Email contains Office document attachment</description>
+    <group>trendmicro,email_security,email_attachment,mail,office_attachment,</group>
+    <mitre>
+      <id>T1566.001</id>
+      <id>T1204.002</id>
+    </mitre>
+  </rule>
+  
+  <rule id="111045" level="3">
+    <if_sid>111033</if_sid>
+    <field name="data.trendmicro_ems.attachments.fileName" type="pcre2">(?i)\.pdf$</field>
+    <description>Trend Micro Email contains PDF attachment</description>
+    <group>trendmicro,email_security,email_attachment,mail,pdf_attachment,</group>
+  </rule>
+  
+  <rule id="111046" level="5">
+    <if_sid>111033</if_sid>
+    <field name="data.trendmicro_ems.embeddedUrls" type="pcre2">(?i).+</field>
+    <description>Trend Micro Email contains embedded URLs</description>
+    <group>trendmicro,email_security,email_url,mail,</group>
+  </rule>
+  
+  <rule id="111047" level="7">
+    <if_sid>111033</if_sid>
+    <field name="data.trendmicro_ems.embeddedUrls" type="pcre2">(?i)^.+,.+$</field>
+    <description>Trend Micro Email contains multiple embedded URLs</description>
+    <group>trendmicro,email_security,email_url,mail,</group>
+  </rule>
+  
+  <rule id="111048" level="10">
+    <if_sid>111033</if_sid>
+    <field name="data.trendmicro_ems.embeddedUrls" type="pcre2">(?i)(bit\.ly|tinyurl\.com|t\.co|goo\.gl|ow\.ly|is\.gd|buff\.ly|rebrand\.ly|cutt\.ly|bitly\.com)</field>
+    <description>Trend Micro Email contains URL shortener link</description>
+    <group>trendmicro,email_security,email_url,mail,suspicious_url,</group>
+    <mitre>
+      <id>T1566.002</id>
+    </mitre>
+  </rule>
+  
+  <rule id="111049" level="5">
+    <if_sid>111033</if_sid>
+    <field name="data.trendmicro_ems.embeddedUrls" type="pcre2">(?i)trendmicro\.com.*wis/clicktime</field>
+    <description>Trend Micro Email contains rewritten URL</description>
+    <group>trendmicro,email_security,email_url,mail,rewritten_url,</group>
+  </rule>
+  
+  <rule id="111050" level="9">
+    <if_sid>111033</if_sid>
+    <field name="data.trendmicro_ems.embeddedUrls" type="pcre2">^(?:[^,]+,){9,}[^,]+$</field>
+    <description>Trend Micro Email contains excessive embedded URLs</description>
+    <group>trendmicro,email_security,email_url,mail,suspicious_url,</group>
+    <mitre>
+      <id>T1566.002</id>
+    </mitre>
+  </rule>
+  
+  <rule id="111051" level="3">
+    <if_sid>111033</if_sid>
+    <field name="data.trendmicro_ems.size" type="pcre2">^[1-9][0-9]{7,}$</field>
+    <description>Trend Micro Email large message observed</description>
+    <group>trendmicro,email_security,email_metadata,mail,large_email,</group>
+  </rule>
+  
+  <rule id="111052" level="11">
+    <if_sid>111036</if_sid>
+    <field name="data.trendmicro_ems.attachments.fileName" type="pcre2">(?i).+</field>
+    <description>Trend Micro quarantined email contains attachment</description>
+    <group>trendmicro,email_security,email_attachment,mail,quarantine,suspicious_attachment,</group>
+    <mitre>
+      <id>T1566.001</id>
+    </mitre>
+  </rule>
+  
+  <rule id="111053" level="11">
+    <if_sid>111036</if_sid>
+    <field name="data.trendmicro_ems.embeddedUrls" type="pcre2">(?i).+</field>
+    <description>Trend Micro quarantined email contains embedded URLs</description>
+    <group>trendmicro,email_security,email_url,mail,quarantine,suspicious_url,</group>
+    <mitre>
+      <id>T1566.002</id>
+    </mitre>
+  </rule>
+  
+  <rule id="111054" level="8">
+    <if_sid>111033</if_sid>
+    <field name="data.trendmicro_ems.size" type="pcre2">^[1-9][0-9]{7,}$</field>
+    <field name="data.trendmicro_ems.embeddedUrls" type="pcre2">(?i).+</field>
+    <description>Trend Micro large email contains embedded URLs</description>
+    <group>trendmicro,email_security,email_url,email_metadata,mail,large_email,</group>
+    <mitre>
+      <id>T1566.002</id>
+    </mitre>
+  </rule>
+  
+  <rule id="111055" level="7">
+    <if_sid>111033</if_sid>
+    <field name="data.trendmicro_ems.tlsInfo" negate="yes" type="pcre2">(?i)TLS</field>
+    <description>Trend Micro Email missing TLS information</description>
+    <group>trendmicro,email_security,email_metadata,mail,tls,</group>
+  </rule>
+  
+</group>

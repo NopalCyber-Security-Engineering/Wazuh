@@ -1,0 +1,1060 @@
+<!-- Modify it at your will. -->
+<!--
+  Copyright (C) 2015, Wazuh Inc.
+-->
+
+<!--
+  Palo Alto v8.X - v10.X rules
+    Palo Alto rules ID:           64500 - 64508
+--> 
+
+<group name="paloalto,">
+
+  <!-- Generic rule -->
+  <rule id="64500" level="0">
+    <decoded_as>paloalto</decoded_as>
+    <description>Palo Alto $(type) event.</description>
+  </rule>
+
+  <!-- Generic by severity(informational, low, medium, high, critical) rules, THREAT and SYSTEM only so far -->
+  <rule id="64501" level="0">
+    <if_sid>64500</if_sid>
+    <field name="severity" type="pcre2">(?i)^(?:informational|low)$</field>
+    <description>Palo Alto $(type): $(severity) event.</description>
+  </rule>
+
+  <rule id="64502" level="0" ignore="3600">
+    <if_sid>64500</if_sid>
+    <field name="severity" type="pcre2">(?i)^medium$</field>
+    <description>Palo Alto $(type): $(severity) event.</description>
+  </rule>
+
+  <rule id="64503" level="0">
+    <if_sid>64500</if_sid>
+    <field name="severity" type="pcre2">(?i)^high$</field>
+    <description>Palo Alto $(type): $(severity) event.</description>
+  </rule>
+
+  <rule id="64504" level="3">
+    <if_sid>64500</if_sid>
+    <field name="severity" type="pcre2">(?i)^critical$</field>
+    <description>Palo Alto $(type): $(severity) event.</description>
+  </rule>   
+  
+  <!-- SYSTEM Related Rules -->
+  
+  <!-- Configuration Change Detected -->
+  <!-- Detects any SYSTEM log indicating a configuration activity -->
+  <rule id="64505" level="3">
+    <if_sid>64500</if_sid>
+    <field name="Type">SYSTEM</field>
+    <field name="module" type="pcre2">(?i)(config|configuration)</field>
+    <description>Configuration activity detected in system log</description>
+  </rule>
+
+    <!-- System Reboot or Shutdown -->
+  <!-- Detects logs mentioning shutdown or reboot events -->
+  <rule id="64506" level="3">
+    <if_sid>64500</if_sid>
+    <field name="Type">SYSTEM</field>
+    <field name="description" type="pcre2">(?i)(shutdown|reboot|restart)</field>
+    <description>System reboot or shutdown activity detected</description>
+  </rule>
+  
+    <!-- Suspicious Module Activity -->
+  <!-- Detects logs referencing suspicious or unknown modules -->
+  <rule id="64507" level="3">
+    <if_sid>64500</if_sid>
+    <field name="Type">SYSTEM</field>
+    <field name="module" type="pcre2">(?i)(rootkit|suspicious|unknown|unauthorized)</field>
+    <description>Suspicious module or process activity detected in system log</description>
+  </rule>
+  
+    <!-- Authentication Failure Detected -->
+  <!-- Matches failed or denied login/authentication attempts -->
+  <rule id="64508" level="3">
+    <if_sid>64500</if_sid>
+    <field name="Type">SYSTEM</field>
+    <field name="module" type="pcre2">(?i)(auth|authentication|login)</field> <!-- Fix module field name with actual name -->
+    <field name="description" type="pcre2">(?i)(failed|unauthorized|denied)</field>
+    <description>Authentication failure detected in system log</description>
+  </rule>
+  
+    <!-- Critical System Alert -->
+  <!-- Captures system logs with explicitly critical issues -->
+  <rule id="64509" level="3">
+    <if_sid>64500</if_sid>
+    <field name="Type">SYSTEM</field>
+    <field name="description" type="pcre2">(?i)(panic|crash|halt|fatal)</field>
+    <description>Critical issue reported in system log</description>
+  </rule>
+  
+    <!-- Interface or Link Status Down -->
+  <!-- Detects network or hardware failures reported in system logs -->
+  <rule id="64510" level="3">
+    <if_sid>64500</if_sid>
+    <field name="Type">SYSTEM</field>
+    <field name="description" type="pcre2">(?i)(interface.*down|link.*failure|port.*error)</field>
+    <description>Network interface or port failure reported in system log</description>
+  </rule>
+  
+    <!-- License or Subscription Issue -->
+  <!-- Detects issues related to license expiration or validation -->
+  <rule id="64511" level="3">
+    <if_sid>64500</if_sid>
+    <field name="Type">SYSTEM</field>
+    <field name="description" type="pcre2">(?i)(license|subscription).*(expired|failure|invalid)</field>
+    <description>License or subscription issue reported in system log</description>
+  </rule>
+  
+    <!-- HA Failover or Split Brain Detected -->
+  <!-- Detects HA (High Availability) issues in firewall cluster -->
+  <rule id="64512" level="3" frequency="5" timeframe="300">
+    <if_matched_sid>64500</if_matched_sid>
+    <same_srcip />
+    <field name="Type">SYSTEM</field>
+    <field name="description" type="pcre2">(?i)(failover|HA|split[- ]brain|cluster.*down)</field>
+    <description>High availability failure or split brain detected</description>
+  </rule>
+  
+    <!-- Time Synchronization Issues -->
+  <!-- Matches NTP sync problems or time drift detections -->
+  <rule id="64513" level="3">
+    <if_sid>64500</if_sid>
+    <field name="Type">SYSTEM</field>
+    <field name="description" type="pcre2">(?i)(ntp|time).*(sync|error|drift|mismatch)</field>
+    <description>Time synchronization issue detected in system log</description>
+  </rule>
+  
+  <!-- Configuration Change Detected (Parent for correlation) -->
+<rule id="64514" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">CONFIG</field>
+  <description>Configuration change detected in firewall</description>
+</rule>
+
+    <!-- Threat Detected with Critical Severity (Parent for correlation) -->
+<rule id="64515" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">THREAT</field>
+  <field name="severity" type="pcre2">(?i)^critical$</field>
+  <description>Critical threat detected in firewall</description>
+</rule>
+    
+    <!-- Configuration Change Followed by Critical Threat -->
+<!-- Correlates config change and critical threat from same device -->
+<rule id="64516" level="3" timeframe="300" frequency="2">
+  <if_matched_sid>64514</if_matched_sid>
+  <if_matched_sid>64515</if_matched_sid>
+  <same_srcip />
+  <description>Critical threat detected after configuration change</description>
+</rule>
+    
+    <!-- Multiple Failed Login Attempts Detected -->
+<rule id="64517" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">SYSTEM</field>
+  <field name="module" type="pcre2">(?i)(auth|login)</field>
+  <field name="description" type="pcre2">(?i)(fail|denied|unauthorized)</field>
+  <description>Authentication failure detected in system log</description>
+</rule>
+
+    <!-- Multiple Failed Logins Followed by Config Change -->
+<!-- Correlates repeated auth failures followed by configuration change from same device -->
+<rule id="64518" level="3" timeframe="600" frequency="4">
+  <if_matched_sid>64517</if_matched_sid>
+  <if_matched_sid>64514</if_matched_sid>
+  <same_srcip />
+  <description>Configuration change performed after multiple failed logins</description>
+</rule>
+
+    <!-- Suspicious Protocol Detected -->
+<!-- Detects traffic using known risky or outdated protocols -->
+<rule id="64519" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">TRAFFIC</field>
+  <field name="application" type="pcre2">(?i)(telnet|ftp|smb|tftp|rlogin)</field>
+  <description>Traffic using suspicious or insecure protocol</description>
+</rule>
+
+    <!-- Suspicious Protocol Used After Configuration Change -->
+<!-- Correlates config change followed by unusual traffic from the same firewall -->
+<rule id="64520" level="3" timeframe="600" frequency="2">
+  <if_matched_sid>64514</if_matched_sid>
+  <if_matched_sid>64519</if_matched_sid>
+  <same_srcip />
+  <description>Suspicious traffic detected after firewall configuration change</description>
+</rule>
+    
+   <!-- Outbound Traffic to Foreign Destination -->
+<!-- Detects traffic where the destination country is foreign -->
+<rule id="64521" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">TRAFFIC</field>
+  <field name="dstcountry" type="pcre2" negate="yes">(?i)^(?!India|IN)$</field>
+  <field name="srczone">LAN</field>
+  <field name="dstzone">WAN</field>
+  <description>Outbound connection to foreign country detected</description>
+</rule>
+
+    <!-- Configuration Change Followed by Foreign IP Connection -->
+<!-- Correlates firewall config changes followed by traffic to foreign IPs -->
+<rule id="64522" level="3" timeframe="600" frequency="2">
+  <if_matched_sid>64514</if_matched_sid>
+  <if_matched_sid>64521</if_matched_sid>
+  <same_srcip />
+  <description>Foreign IP access detected after firewall configuration change</description>
+</rule>
+
+<!-- TRAFFIC Related Rules -->
+
+<!-- Traffic - Action deny -->
+<!-- Detects traffic log entries with action "deny" -->
+<rule id="64523" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">TRAFFIC</field>
+  <action>deny</action>
+  <description>Traffic blocked by firewall policy - deny</description>
+</rule>
+
+<!-- Unknown Application Detected -->
+<!-- Detects traffic using unknown-tcp or unknown-udp protocols -->
+<rule id="64524" level="5"> 
+<if_sid>64500</if_sid>
+  <field name="Type">TRAFFIC</field>
+  <field name="application" type="pcre2">(?i)^(unknown-tcp|unknown-udp|not-applicable)$</field>
+  <dstport type="pcre2" negate="yes">^(53|123|8000|443)$</dstport>
+  <field name="srczone">LAN</field>
+  <field name="dstzone">WAN</field>
+  <description>Threat: Outbound Traffic with unknown application detected.</description>
+  <group>unclassified_traffic,reconnaissance,policy_violation</group>
+</rule>
+
+
+ <!-- High Volume Data Transfer -->
+<!-- Detects traffic where total bytes exceed common thresholds -->
+<rule id="64525" level="3" frequency="5"  timeframe="300">
+  <if_matched_sid>64500</if_matched_sid>
+  <field name="Type">TRAFFIC</field>
+  <same_dstip />
+  <field name="bytes" type="pcre2">^[5-9]\d{6,}|^\d{7,}$</field> <!-- File size more than 5MB -->
+  <description>Large volume of data transferred to same destination ip address</description>
+</rule>
+
+  <!-- Internal to External Traffic Flow -->
+<!-- Detects traffic going from private to public IP space -->
+<rule id="64526" level="0">
+<if_sid>64500</if_sid>
+<field name="Type">TRAFFIC</field>
+<field name="srczone">LAN</field>
+<field name="dstzone">WAN</field>
+<description>Traffic from internal network to external destination</description>
+</rule>
+
+  
+  <!-- Multiple Low-Volume Traffic Connections -->
+<!-- Detects traffic with low bytes and different destination ports -->
+<rule id="64527" level="0">
+  <if_sid>64500</if_sid>
+  <field name="Type">TRAFFIC</field>
+  <field name="bytes" type="pcre2">^(0|[1-9]\d{0,3})$</field>
+  <field name="packets" type="pcre2">^(0|1)$</field>
+  <description>Possible port scan or recon activity detected in traffic</description>
+</rule>
+
+  <!-- Multiple External Destinations -->
+<!-- Detects multiple traffic connections from a single internal IP to different public IPs -->
+<rule id="64528" level="3" frequency="100"  timeframe="300">
+  <if_matched_sid>64500</if_matched_sid>
+  <field name="Type">(?i)TRAFFIC</field>
+  <same_srcip />
+  <field name="srczone">LAN</field>
+  <field name="dstzone">WAN</field>
+  <different_dstip />
+  <description>Internal host communicating with multiple external destinations</description>
+</rule>
+
+  <!-- Traceroute Detected -->
+<!-- Detects use of traceroute application in traffic logs -->
+<rule id="64529" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">TRAFFIC</field>
+  <field name="application">traceroute</field>
+  <description>Traceroute traffic observed in the network</description>
+</rule>
+
+  <!-- Traffic to High-Risk Geolocation -->
+<!-- Threat - Palo Alto malicious allowed traffic from anomalous Locations -->
+<rule id="64530" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">TRAFFIC</field>
+  <action>allow</action>
+  <field name="dstcountry" type="pcre2">(?i)^(Russia|China)$</field>
+  <field name="srczone">LAN</field>
+  <field name="dstzone">WAN</field>
+  <description>Traffic sent to potentially risky destination country</description>
+</rule>
+       
+  <!-- Vulnerable Application Access -->
+<!-- Detects usage of application marked with vulnerabilities -->
+<rule id="64531" level="0">
+  <if_sid>64500</if_sid>
+  <field name="Type">TRAFFIC</field>
+  <match>has-known-vulnerability</match>
+  <description>Traffic involves application with known vulnerability</description>
+</rule>
+
+    <!-- Proxy or VPN Application Traffic -->
+<!-- Detects use of known VPN or proxy applications -->
+<rule id="64532" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">TRAFFIC</field>
+  <field name="application" type="pcre2">(?i)(ultrasurf|psiphon|hotspotshield|openvpn|proxy)</field>
+  <field name="srczone">LAN</field>
+  <field name="dstzone">WAN</field>
+  <description>Traffic using VPN or proxy application detected</description>
+</rule>
+
+    <!-- Suspicious Data Exfiltration -->
+<!-- Detects high-volume outbound traffic shortly after a config change -->
+<rule id="64533" level="3">
+  <if_sid>64512</if_sid> <!-- Config Change -->
+  <if_matched_sid>64525</if_matched_sid> <!-- High Volume Data Transfer -->
+  <same_srcip />
+  <field name="srczone">LAN</field>
+  <field name="dstzone">WAN</field>
+  <description>High volume outbound traffic observed after configuration change</description>
+</rule>
+
+    <!-- Unknown Application Execution -->
+<!-- Detects unknown or unclassified traffic applications after a config change -->
+<rule id="64534" level="3">
+  <if_sid>64512</if_sid>
+  <if_matched_sid>64524</if_matched_sid> <!-- Unknown Application -->
+  <same_srcip />
+  <description>Unknown application traffic observed after configuration change</description>
+</rule>
+    
+    <!-- Suspicious Geolocation Access -->
+<!-- Detects traffic to Russia or China after a config change -->
+<rule id="64535" level="3">
+  <if_sid>64512</if_sid>
+  <if_matched_sid>64530</if_matched_sid> <!-- Destination Country: Russia or China -->
+  <same_srcip />
+  <description>Traffic to high-risk destination country observed after config change</description>
+</rule>
+    
+    <!-- Evasion via Proxy or VPN -->
+<!-- Detects VPN/proxy traffic shortly after a configuration/policy change -->
+<rule id="64536" level="3">
+  <if_sid>64512</if_sid>
+  <if_matched_sid>64532</if_matched_sid> <!-- VPN/Proxy Application -->
+  <same_srcip />
+  <description>VPN or proxy traffic observed after configuration change</description>
+</rule>
+
+    <!-- Botnet/Scanner Behavior Post Boot -->
+<!-- Detects burst of connections to multiple public IPs after SYSTEM reboot -->
+<rule id="64537" level="3">
+  <if_sid>64507</if_sid> <!-- System Reboot Detected -->
+  <if_matched_sid>64528</if_matched_sid> <!-- Multiple External Destinations -->
+  <same_srcip />
+  <field name="srczone">LAN</field>
+  <field name="dstzone">WAN</field>
+  <description>Multiple external traffic connections after device reboot</description>
+</rule>
+
+<!--   Palo Alto CONFIG Rules -->
+    
+  <!-- Admin Login Success -->
+<!-- Detects successful administrative login via web or CLI -->
+<rule id="64538" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">CONFIG</field>
+  <field name="cmd">Admin login</field>
+  <field name="result">Succeeded</field>
+  <description>Administrative login succeeded</description>
+</rule>
+  
+    <!-- Admin Login Failure -->
+<!-- Detects failed login attempt to administrative interface -->
+<rule id="64539" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">CONFIG</field>
+  <field name="cmd">Admin login</field>
+  <field name="result">Failed</field>
+  <description>Administrative login failed</description>
+</rule>
+    
+   <!-- New Administrator Created -->
+<!-- Detects creation of new admin-level user account -->
+<rule id="64540" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">CONFIG</field>
+  <field name="command" type="pcre2">(?i)^Add user$</field>
+  <field name="admin" type="pcre2">(?i)^admin</field>
+  <description>New administrative user account created</description>
+</rule>
+
+     <!-- Configuration Commit -->
+<!-- Detects successful commit of new configuration changes -->
+<rule id="64541" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">CONFIG</field>
+  <field name="command">commit</field>
+  <field name="result">Succeeded</field>
+  <description>Configuration changes committed successfully</description>
+</rule>
+
+    <!-- CLI Command Executed -->
+<!-- Detects direct CLI execution via console or SSH -->
+<rule id="64542" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">CONFIG</field>
+  <field name="command" type="pcre2">(?i)^CLI command</field>
+  <description>Administrative command executed via CLI</description>
+</rule>
+    
+    <!-- Palo Alto THREAT Rules -->
+    
+<!-- Malware Detected -->
+<!-- Detects threat logs categorized as malware -->
+<rule id="64543" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">THREAT</field>
+  <field name="threat.name" type="pcre2">(?i)^malware$</field>
+  <description>Malware activity detected in network traffic</description>
+</rule>
+
+    <!-- Command and Control Communication -->
+<!-- Detects outbound traffic linked to known C2 infrastructure -->
+<rule id="64544" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">THREAT</field>
+  <field name="threat_category" type="pcre2">(?i)^command-and-control$</field>
+  <description>Command and Control communication attempt detected</description>
+</rule>
+
+    <!-- Phishing Attack Detected -->
+<!-- Detects URLs or emails flagged as phishing -->
+<rule id="64545" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">THREAT</field>
+  <field name="threat_category" type="pcre2">(?i)^phishing$</field>
+  <description>Phishing attempt detected in network traffic</description>
+</rule>
+    
+    <!-- Exploit Attempt -->
+<!-- Detects use of known exploit against system/application -->
+<rule id="64546" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">THREAT</field>
+  <field name="threat_category" type="pcre2">(?i)^exploit$</field>
+  <description>Exploit attempt detected targeting known vulnerability</description>
+</rule>
+
+    <!-- Port Scan or Recon Activity -->
+<!-- Detects scanning or information gathering attempts -->
+<rule id="64547" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">THREAT</field>
+  <field name="threat_category" type="pcre2">(?i)^(reconnaissance|scan)$</field>
+  <description>Port scanning or reconnaissance behavior detected</description>
+</rule>
+    
+    <!-- DNS Tunneling Detected -->
+<!-- Detects use of DNS protocol for tunneling suspicious traffic -->
+<rule id="64548" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">THREAT</field>
+  <field name="application" type="pcre2">(?i)^dns$</field>
+  <field name="threat_category" type="pcre2">(?i)^dns-tunnel$</field>
+  <description>Suspicious DNS tunneling activity detected</description>
+</rule>
+
+    <!-- Brute Force Login Detected -->
+<!-- Detects repeated failed authentication attempts over known services -->
+<rule id="64549" level="0" noalert="1"> <!-- Aggregation rule ID:100031 created -->
+  <if_sid>64500</if_sid>
+  <field name="Type">THREAT</field>
+  <field name="threat_category" type="pcre2">(?i)^brute-force$</field>
+  <description>Brute force authentication attempt detected</description>
+</rule>
+
+    <!-- Spyware/Adware Activity Detected -->
+<!-- Detects spyware, adware, or tracking software communication -->
+<rule id="64550" level="3" noalert="1">
+  <if_sid>64500</if_sid>
+  <field name="Type">THREAT</field>
+  <field name="threat_category" type="pcre2">(?i)^(spyware|adware)$</field>
+  <description>Spyware or adware communication detected in traffic</description>
+</rule>
+
+    
+    <!-- Suspicious File Download -->
+<!-- Detects download of potentially harmful executable or script -->
+<rule id="64551" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">THREAT</field>
+  <field name="misc" type="pcre2">(?i)\.(exe|js|vbs|ps1|dll|bat|jar|scr|msi)$</field>
+  <description>Suspicious file download detected in network traffic</description>
+</rule>
+    
+    <!-- Dynamic DNS Domain Used -->
+<!-- Detects use of known dynamic DNS services in threat logs -->
+<rule id="64552" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">THREAT</field>
+  <field name="misc" type="pcre2">(?i)(dyndns\.org|no-ip\.com|duckdns\.org|freedns\.afraid\.org)</field>
+  <description>Dynamic DNS domain observed in traffic</description>
+</rule>
+
+    <!-- TOR Network Detected -->
+<!-- Detects application traffic over TOR anonymizer network -->
+<rule id="64553" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">THREAT</field>
+  <field name="application" type="pcre2">(?i)^tor$</field>
+  <description>TOR anonymizer traffic detected in network activity</description>
+</rule>
+
+    <!-- Cryptomining Detected -->
+<!-- Detects mining traffic to known crypto mining pools -->
+<rule id="64554" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">THREAT</field>
+  <field name="threat_category" type="pcre2">(?i)^cryptominer$</field>
+  <description>Cryptocurrency mining activity detected</description>
+</rule>
+
+    <!-- Exploit Attempt Detected -->
+<!-- Detects attempts to exploit OS or known app vulnerabilities -->
+<rule id="64555" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">THREAT</field>
+  <field name="threat_category" type="pcre2">(?i)^(exploit|code-execution|buffer-overflow)$</field>
+  <description>Operating system or application exploit attempt detected</description>
+</rule>
+
+    <!-- IOC Domain Hit -->
+<!-- Detects access to domains associated with threat intelligence IOCs -->
+<rule id="64556" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">THREAT</field>
+  <field name="misc" type="pcre2">(?i)\.top|\.gq|\.xyz|malicious-domain\.com</field>
+  <description>Connection attempt to known malicious domain indicator</description>
+</rule>
+
+    <!-- Outbound Threat via Uncommon Port -->
+<!-- Detects outbound threat activity using non-standard ports (not 80, 443, 53) -->
+<rule id="64557" level="5" frequency="3" timeframe="3600">
+  <if_matched_sid>64515</if_matched_sid>
+  <dstport type="pcre2" negate="yes">^(80|443|53)$</dstport> <!-- Excluded Standard ports -->
+  <srcip negate="yes">192.168.254.253</srcip> <!-- email security gateway IP excluded -->
+  <field name="srczone">LAN|DMZ</field>
+  <field name="dstzone">WAN</field>
+  <description>Palo Alto: Repeated outbound threat activity using uncommon port</description>
+</rule>
+    
+    <!-- Internal RDP Activity -->
+<!-- Detects RDP sessions initiated within private network ranges (Lateral Movement: RDP Detected Internally) -->
+<rule id="64558" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">THREAT</field>
+  <field name="application" type="pcre2">(?i)^ms-rdp$</field>
+  <field name="srczone">LAN</field>
+  <field name="dstzone">WAN</field>
+  <description>RDP session detected between internal systems</description>
+</rule>
+
+    <!-- Internal SMB Activity -->
+<!-- Detects SMB traffic between private hosts over TCP 445 (Lateral Movement: SMB/445 Detected Internally) -->
+<rule id="64559" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">THREAT</field>
+  <field name="application" type="pcre2">(?i)^ms-ds-smb$</field>
+  <field name="srczone">LAN</field>
+  <field name="dstzone">WAN</field>
+  <description>Internal SMB communication detected between systems</description>
+</rule>
+    
+    <!-- DNS Flood Detected (DNS Anomaly: Excessive DNS Queries) -->
+<!-- Detects excessive DNS queries from a single source in short time -->
+<rule id="64560" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">THREAT</field>
+  <field name="application">dns</field>
+  <field name="packets" type="pcre2">^\d{3,}$</field>
+  <description>Potential DNS flood or tunneling detected</description>
+</rule>
+    
+
+<!-- Spyware Detected and Allowed -->
+<rule id="64561" level="3">
+  <if_sid>64500</if_sid>
+  <field name="Type">THREAT</field>
+  <field name="threat.name">spyware</field>
+  <action>allow</action>
+  <description>Spyware Detected and Allowed</description>
+</rule>
+
+<!-- Traffic Session Allowed -->
+<rule id="64562" level="0">
+  <if_sid>64500</if_sid>
+  <field name="Type">TRAFFIC</field>
+  <action>allow</action>
+  <description>Spyware Detected and Allowed</description>
+</rule>
+
+<!-- Custom rules by NopalCyber -->
+
+<!-- Detects SMB Outbound Traffic -->
+  <rule id="100010" level="3">
+    <if_sid>64500</if_sid>
+    <field name="Type">TRAFFIC</field>
+    <action>allow</action>
+    <dstport>^(445|139)$</dstport>
+    <field name="srczone">LAN</field>
+    <field name="dstzone">WAN</field>
+    <description>Palo Alto: Detected outbound SMB traffic to an external IP address</description>
+  </rule>
+  
+<!-- ########## New custom rules by nopalcyber to in line with splunk rules Nov-2025  ##########  -->
+
+<!-- Access - Palo Alto VPN User Authentication Failure -->
+<rule id="100011" level="0">
+<if_sid>64500</if_sid>
+<field name="Type">GLOBALPROTECT</field> <!-- GLOBALPROTECT log type -->
+<field name="stage">login</field> <!-- Subtype must match login attempts -->
+<status type="pcre2">(?i)fail|failed|failure</status> <!-- Authentication failed -->
+<description>Palo Alto: VPN user authentication failed</description> 
+<group>paloalto,vpn,authentication_failure</group>
+</rule>
+
+<!-- Multiple Palo Alto VPN User Authentication Failures -->
+<rule id="100012" level="10" frequency="6" timeframe="3600">
+<if_matched_sid>100011</if_matched_sid>
+<same_user /> <!-- Authentication failed -->
+<same_srcip />
+<description>Palo Alto: Multiple VPN authentication failures for the same user from same source IP (Possible Bruteforce attack)</description>
+<group>paloalto,vpn,authentication_bruteforce</group>
+<mitre>
+<id>T1110</id>
+</mitre>
+</rule>
+
+<!-- Network - Firewall PaloAlto Inbound Application Access -->
+<rule id="100013" level="3"> <!-- For noise reduction ruled changed from 12 to 3, once SOC confirm the applications improve the rule -->
+<if_sid>64526</if_sid> <!-- "Traffic" logs -->
+<action>allow</action>
+<field name="application">anydesk|teamviewer|torrent|bittorrent</field>
+<field name="srczone">LAN</field>
+<field name="dstzone">WAN</field>
+<field name="rule_name" negate="yes">^Patient-Wifi$</field> <!-- This location is allowed -->
+<description>Palo Alto: High-Risk Application Traffic Detected</description>
+<mitre>
+<id>T1071.001</id>
+</mitre>
+</rule>
+
+<!-- Network - Firewall PaloAlto Vulnerability Detection -->
+<rule id="100014" level="3">
+<if_sid>64500</if_sid>
+<field name="Type">THREAT</field>
+<field name="threat.name">vulnerability</field> <!-- only vulnerability related logs -->
+<field name="severity" negate="yes" type="pcre2">(?i)(informational)</field>   <!-- Other than informational events -->
+<action negate="yes">(?i)(drop|Attack Blocked)</action> <!-- Other than blocked events -->
+<description>Palo Alto: Vulnerability Detection</description>
+<mitre>
+<id>T1071.001</id>
+</mitre>
+</rule>
+
+<!-- Network - Palo Alto - Critical P2P Ports Traffic - Rule -->
+<rule id="100015" level="3"> <!-- rule level changed from 7 to 3 and aggreation rule ID:100030 is created -->
+<if_sid>64526</if_sid> <!-- "Traffic" logs -->
+<action negate="yes" type="pcre2">(?i)(deny|drop)</action>	<!-- Action must NOT be blocked -->
+<field name="session_end_reason" negate="yes">aged-out</field> <!-- Working Perfectly -->	<!-- Exclude aged-out connections -->
+<dstport>^(5656|6086|14800|18080|24465|9389|9898|9988)$</dstport>	<!-- Critical P2P / high-risk ports -->
+<field name="dstzone">WAN</field>
+<description>Palo Alto: Critical P2P / high-risk ports traffic detected</description>
+<mitre>
+<id>T1040</id> <!-- Network sniffing / suspicious comms -->
+</mitre>
+</rule>
+ 
+<!-- Network - PaloAlto WildFire Detection -->
+<rule id="100016" level="12">
+<if_sid>64500</if_sid> <!-- Base Palo Alto event -->
+<field name="Type">THREAT</field> <!-- Threat log type -->
+<field name="threat.name" type="pcre2">^wildfire$</field> <!-- WildFire subtype -->
+<action>allow</action> <!-- File was allowed by policy -->
+<field name="category" negate="yes">^benign$</field>
+<description>Palo Alto WildFire: Caution - Malicious file allowed.</description>
+<group>wildfire_threat,malware_delivery,policy_violation</group>
+<mitre>
+<id>T1190</id> <!-- Exploit Public-Facing Application -->
+<id>T1071.001</id> <!-- Application Layer Protocol -->
+</mitre>
+</rule>
+
+<!-- Threat - Firewall PaloAlto Virus Signature Detected -->
+<rule id="100017" level="10">
+<if_sid>64500</if_sid>
+<field name="Type">THREAT</field>
+<field name="threat.name">virus|wildfire|wildfire-virus</field>
+<action>allow</action>
+<description>Palo Alto: Virus or WildFire signature detected and allowed</description>
+<mitre>
+<id>T1204</id>
+</mitre>
+</rule>
+
+<!-- Threat - Palo Alto - Critical Torrent Ports Monitoring -->
+<rule id="100018" level="3" noalert="1"> <!-- Noise Reduction WIP - Level changed from 7 to 3. and noalert set to 1, Noise is from 3000 port. -->
+<if_sid>64526</if_sid> <!-- "Traffic" logs -->
+<action>allow</action>
+<dstport>^(3000|6771|9091|6881)$</dstport>
+<field name="session_end_reason" negate="yes">aged-out</field> <!-- Working Perfectly -->
+<field name="srczone">LAN|DMZ</field>
+<field name="dstzone">WAN</field>
+<description>Palo Alto: Critical Torrent ports traffic detected</description>
+<mitre>
+<id>T1090</id>
+</mitre>
+</rule>
+
+<!-- Threat - Allowed Outbound traffic on Ransomware Port -->
+<rule id="100019" level="10">
+<if_sid>64526</if_sid> <!-- "Traffic" logs -->
+<action>allow</action>
+<dstport>^13655$</dstport>
+<field name="srczone">LAN</field>
+<field name="dstzone">WAN</field>
+<description>CRITICAL: Allowed Outbound Ransomware Traffic Detected Ransomware Port.</description>
+<mitre>
+<id>T1071.001</id> <id>T1048</id> </mitre>
+<group>ransomware,c2_traffic,policy_violation,pci_dss_10.2.4,nist_800_53_AC.4,tsc_CC6.1,</group>
+</rule>
+
+<!-- Threat - Phishing Email detection --> 
+<rule id="100020" level="12">
+<if_sid>64500</if_sid> 
+<field name="Type">THREAT</field>
+<field name="severity">high</field>
+<field name="threat_id" type="pcre2">Email Link\(52143\)</field>
+<action>allow</action>
+<description>CRITICAL: Phishing Link Allowed - Palo Alto allowed a high-severity Email Link threat to pass.</description>
+<mitre>
+<id>T1566.001</id> <id>T1071.001</id> </mitre>
+<group>phishing,email_threat,critical_policy_violation,pci_dss_10.2.4,nist_800_53_SI.4,tsc_CC6.1,tsc_CC7.2,</group>
+</rule>
+
+<!-- Allowed Outbound RDP Connection to External IP -->
+<rule id="100021" level="9">
+<if_sid>64526</if_sid> <!-- "Traffic" logs -->
+<action>allow</action>
+<dstport>^3389$</dstport>
+<field name="dstzone">WAN</field>
+<field name="session_end_reason" type="pcre2" negate="yes">^(tcp-rst-from-server|tcp-fin|aged-out)$</field> <!-- Working Perfectly -->	<!-- Exclude aged-out connections -->
+<dstip negate="yes">15.206.245.157</dstip> <!-- PE:404 Genuine traffic to HRMS Application Server (15.206.245.157) -->
+<description>Allowed Outbound RDP Connection to External IP - Potential policy violation or unauthorized remote access.</description>
+<mitre>
+<id>T1021.001</id> 
+<id>T1071.001</id> 
+</mitre>
+<group>unauthorized_access,remote_access,policy_violation,pci_dss_10.2.4,nist_800_53_AC.4,tsc_CC6.1,</group>
+</rule>
+
+<!-- GlobalProtect VPN Login from Unauthorized Country (Other than Inida)-->
+<rule id="100022" level="5"> <!-- Finetune can be done by excluding LANed/know user list in CBD -->
+<if_sid>64500</if_sid>
+<field name="Type">GLOBALPROTECT</field> <!-- GLOBALPROTECT log type -->
+<field name="stage" type="pcre2">^login$</field> <!-- Subtype must match login attempts -->
+<status type="pcre2">(?i)(success)</status>
+<field name="source_region" type="pcre2" negate="yes">^IN$</field> <!-- Other than india -->
+<description>CRITICAL: GlobalProtect VPN Login from Unauthorized Country.</description>
+<mitre>
+<id>T1078</id> 
+<id>T1534</id> 
+</mitre>
+<group>vpn_security,geographical_policy_violation,unauthorized_access,pci_dss_10.2.4,nist_800_53_AC.7,tsc_CC6.1,</group>
+</rule>
+
+<!-- Threat - PaloAlto WildFire Detection (ESA Bypass Suspected) -->
+<rule id="100023" level="12">
+<if_sid>64500</if_sid> <!-- Base Palo Alto event -->
+<field name="Type">THREAT</field> <!-- THREAT log type -->
+<field name="threat.name">wildfire</field> <!-- WildFire subtype -->
+<field name="file_type" type="pcre2" negate="yes">^email-link$</field> <!-- signature != Email Link -->
+<action>allow</action> <!-- File was allowed by policy -->
+<description>Palo Alto WildFire: Malicious file allowed and signature indicates ESA did not block email-borne threat. Possible ESA bypass.</description>
+<group>wildfire_threat,email_bypass,policy_violation</group>
+<mitre>
+<id>T1566</id> <!-- Phishing (email vector) -->
+<id>T1190</id> <!-- Exploit via public-facing apps -->
+<id>T1071.001</id> <!-- Application layer protocol -->
+</mitre>
+</rule>
+
+<!-- Palo Alto - Critical Proxy Ports Monitoring -->
+<rule id="100024" level="3">
+<if_sid>64526</if_sid> <!-- "Extranal Traffic" logs -->
+<action>(?i)(allow|alert|accept)</action> <!-- action are allow, alert, accept) -->
+<dstport>^(7777|8388|8580|8997|8998|8999|8332)$</dstport> <!-- Critical proxy ports -->
+<description>Palo Alto: Outbound traffic detected on critical proxy ports</description>
+</rule>
+
+<!-- Network - Palo Alto - Configuration Changes - Rule -->
+<rule id="100025" level="10">
+<if_sid>64500</if_sid>
+<field name="Type">CONFIG</field> <!-- Must be a Palo Alto CONFIG log -->
+<field name="command" negate="yes">commit</field>  <!-- Exclude "commit" operations -->
+<field name="admin" type="pcre2" negate="yes">^chanakya.g$</field>  <!-- Exclude LANed admin user -->
+<description>Palo Alto: Unauthorized or unexpected configuration change detected</description>
+<mitre>
+<id>T1098</id> <!-- Account Manipulation / Admin Changes -->
+</mitre>
+</rule>
+
+<!-- Palo Alto - Critical Cryptomining Ports Traffic -->
+<rule id="100026" level="8" frequency="3" timeframe="3600">
+<if_matched_sid>64526</if_matched_sid> <!-- Internal to external traffic -->
+<action negate="yes">(?i)^(drop|deny|blocked|drop-packet|reset-both|block-url)$</action> <!-- Allowed traffic only -->
+<dstport>^(8333|9333|9031|9999|22556|30303)$</dstport>
+<same_srcip /> <!-- Repeated behavior from same host --> <!-- Added this line to reduce the noise alerts -->
+<field name="srczone">LAN|DMZ</field>
+<field name="dstzone">WAN</field>
+<description>Palo Alto: Critical cryptomining ports traffic detected</description>
+<mitre>
+<id>T1496</id>
+</mitre>
+</rule>
+
+<!-- Palo Alto - Critical TOR/Onion Ports Traffic -->
+<rule id="100027" level="8" frequency="3" timeframe="7200">
+<if_matched_sid>64526</if_matched_sid> <!-- "Traffic" logs -->
+<action negate="yes">(?i)^(drop|Attack Blocked|blocked|drop-packet|reset-both|block-url)$</action>  <!-- Excluding than blocked traffic -->
+<dstport>^(9001|9030|9031|9050|9051|9150|9151)$</dstport>
+<same_srcip /> <!-- Added this line to reduce the noise alerts -->
+<field name="srczone">LAN|DMZ</field>
+<field name="dstzone">WAN</field>
+<description>Palo Alto: Critical TOR/Onion ports traffic detected</description>
+<mitre>
+<id>T1090.003</id>
+</mitre>
+</rule>
+
+<!-- Palo Alto - Spyware Signatures Detected -->
+<rule id="100028" level="10" timeframe="300">
+<if_matched_sid>64561</if_matched_sid>
+<if_sid>64562</if_sid>
+<same_srcip />
+<same_dstip />
+<same_dstport />
+<description>Palo Alto: Spyware detected and allowed with matching traffic session</description>
+<mitre>
+<id>T1055</id>
+</mitre>
+</rule>
+
+<!-- Palo Alto - Network_Firewall - Configuration Changes -->
+<rule id="100029" level="5">
+<if_sid>64500</if_sid>
+<field name="Type">CONFIG</field>
+<field name="command">edit</field>
+<!-- scope for noise redcution is to excluede the know admin users - ex: chanakya.g, samba -->
+<!-- <field name="admin" type="pcre2" negate="yes">(?i)(chanakya.g|samba)</field> Enable this after confimatio from LarusLabs team -->
+<description>Palo Alto: Firewall configuration edited</description>
+<mitre>
+<id>T1602</id>
+</mitre>
+</rule>
+
+<!-- Aggreation rule for rule ID: 100015 -->
+
+<rule id="100030" level="7" frequency="100" timeframe="300" ignore="3600">
+<if_matched_sid>100015</if_matched_sid>
+<same_srcip />
+<description>Palo Alto: Excessive Critical P2P / high-risk ports traffic detected from same source IP</description>
+<mitre>
+<id>T1040</id> <!-- Network sniffing / suspicious comms -->
+</mitre>
+</rule>
+
+    <!-- Multiple Brute Force Login Attempts Detected -->
+<!-- Detects repeated failed authentication attempts over known services -->
+<rule id="100031" level="3" frequency="100" timeframe="300"> <!-- 100 alerts in 5 Min --> <!-- For testing rule level set to 3 change to 9 after testing -->
+  <if_matched_sid>64549</if_matched_sid>    <!-- Single alert for Brute force authentication attempt detected  -->
+  <description>Multiple brute force authentication attempts detected</description>
+</rule>
+
+<!-- Multiple PaloAlto Inbound Allowed Application Access Detected -->
+<rule id="100032" level="3" frequency="10" timeframe="300"> <!-- For noise reduction ruled changed from 12 to 3, once SOC confirm the applications improve the rule -->
+<if_matched_sid>100013</if_matched_sid> <!-- Single event of PaloAlto Inbound Application Access -->
+<description>Palo Alto: Multiple Firewall Inbound Allowed Application Access Detected</description>
+<mitre>
+<id>T1071.001</id>
+</mitre>
+</rule>
+
+</group>
+
+
+<!-- ##########   Axios Supply Chain Attack - FortiGate Detection Rules By NopalCyber April-2026  Rule Range from 100040 to 100050  ##########  -->
+
+<group name="paloalto,supply_chain,axios_rat,">
+
+<!-- Axios Supply Chain IOC found anywhere in PaloAlto logs. -->
+  <rule id="100040" level="5">
+    <if_sid>64500</if_sid>
+    <match>sfrclak\.com|plain-crypto-js</match>
+    <description>PaloAlto: Axios Supply Chain Attack related IOC detected in firewall logs - $(srcip) → $(dstip)</description>
+    <mitre>
+      <id>T1071.001</id>
+      <id>T1195.002</id>
+    </mitre>
+    <group>axios_rat,supply_chain,c2,paloalto,</group>
+  </rule>
+
+<!-- C2 DOMAIN IN URL FILTERING LOG (THREAT/URL) -->
+  <rule id="100041" level="15">
+    <if_sid>64500</if_sid>
+    <field name="Type">^THREAT$</field>
+    <field name="threat.name" type="pcre2">^url$</field>
+    <field name="url_filename" type="pcre2">(?i)sfrclak\.com</field>
+    <description>Axios RAT: CRITICAL - C2 domain sfrclak.com detected in PaloAlto URL filter log - $(srcip) attempted $(url_filename)</description>
+    <mitre>
+      <id>T1071.001</id>
+      <id>T1041</id>
+      <id>T1195.002</id>
+    </mitre>
+    <group>axios_rat,supply_chain,c2,url_filter,paloalto,pci_dss_11.4,gdpr_IV_35.7.d,nist_800_53_SI.4,tsc_CC6.8,tsc_CC7.2,</group>
+  </rule>
+
+<!-- C2 TRAFFIC ALLOWED (TRAFFIC log) -->
+  <rule id="100042" level="15">
+    <if_sid>100040</if_sid>
+    <field name="Type">^TRAFFIC$</field>
+    <action type="pcre2">^allow$</action>
+    <description>Axios RAT: CRITICAL - C2 traffic to sfrclak.com ALLOWED by PaloAlto - $(srcip) is actively communicating with RAT C2</description>
+    <mitre>
+      <id>T1071.001</id>
+      <id>T1041</id>
+      <id>T1195.002</id>
+    </mitre>
+    <group>axios_rat,supply_chain,c2,active_infection,paloalto,pci_dss_11.4,gdpr_IV_35.7.d,nist_800_53_SI.4,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+  </rule>
+
+<!-- C2 TRAFFIC BLOCKED (TRAFFIC log) -->
+  <rule id="100043" level="12">
+    <if_sid>100040</if_sid>
+    <field name="Type">^TRAFFIC$</field>
+    <action type="pcre2">^deny$|^drop$|^reset-both$|^reset-client$|^reset-server$</action>
+    <description>Axios RAT: HIGH - C2 traffic to sfrclak.com BLOCKED by PaloAlto - $(srcip) may be infected, investigate endpoint</description>
+    <mitre>
+      <id>T1071.001</id>
+      <id>T1041</id>
+      <id>T1195.002</id>
+    </mitre>
+    <group>axios_rat,supply_chain,c2,blocked_c2,paloalto,pci_dss_11.4,gdpr_IV_35.7.d,nist_800_53_SI.4,tsc_CC6.8,tsc_CC7.2,</group>
+  </rule>
+  
+<!-- C2 URL BLOCKED BY URL FILTER (THREAT log) -->
+  <rule id="100044" level="12">
+    <if_sid>64500</if_sid>
+    <field name="Type">^THREAT$</field>
+    <field name="threat.name" type="pcre2">^url$</field>
+    <field name="url_filename" type="pcre2">(?i)sfrclak\.com</field>
+    <action type="pcre2">^block-url$</action>
+    <description>Axios RAT: HIGH - PaloAlto URL filter BLOCKED access to C2 domain sfrclak.com from $(srcip) - Investigate endpoint</description>
+    <mitre>
+      <id>T1071.001</id>
+      <id>T1566.002</id>
+    </mitre>
+    <group>axios_rat,supply_chain,c2,url_blocked,paloalto,pci_dss_11.4,gdpr_IV_35.7.d,nist_800_53_SI.4,tsc_CC6.8,</group>
+  </rule>
+
+<!-- OUTBOUND PORT 8000 TO WAN (TRAFFIC log) -->
+<!--  <rule id="100045" level="3"> //PE-490
+    <if_sid>64526</if_sid>
+    <dstport>^8000$</dstport>
+    <description>Axios RAT: HIGH - Suspicious outbound connection on port 8000 detected by PaloAlto - $(srcip) → $(dstip):$(dstport)</description>
+    <mitre>
+      <id>T1071.001</id>
+      <id>T1041</id>
+    </mitre>
+    <group>axios_rat,supply_chain,c2,suspicious_port,paloalto,pci_dss_11.4,gdpr_IV_35.7.d,nist_800_53_SI.4,</group>
+  </rule> -->
+
+<!-- MALICIOUS npm PACKAGE IN URL (THREAT log) -->
+  <rule id="100046" level="15">
+    <if_sid>64500</if_sid>
+    <field name="Type">^THREAT$</field>
+    <field name="threat.name" type="pcre2">^url$</field>
+    <field name="url_filename" type="pcre2">(?i)plain-crypto-js</field>
+    <description>Axios RAT: CRITICAL - Malicious npm package plain-crypto-js download detected by PaloAlto from $(srcip) - Supply chain attack in progress</description>
+    <mitre>
+      <id>T1195.002</id>
+      <id>T1071.001</id>
+    </mitre>
+    <group>axios_rat,supply_chain,malicious_package,paloalto,pci_dss_11.4,gdpr_IV_35.7.d,nist_800_53_SI.4,tsc_CC6.8,tsc_CC7.2,</group>
+  </rule>
+
+<!-- IPS/THREAT DETECTION ON C2 DOMAIN -->
+  <rule id="100047" level="15">
+    <if_sid>64500</if_sid>
+    <field name="Type">^THREAT$</field>
+    <field name="threat.name" type="pcre2" negate="yes">^url$</field>
+    <field name="url_filename" type="pcre2">(?i)sfrclak\.com</field>
+    <description>Axios RAT: CRITICAL - PaloAlto IPS/Threat Prevention triggered on C2 domain sfrclak.com - $(srcip) → $(url_filename)</description>
+    <mitre>
+      <id>T1071.001</id>
+      <id>T1041</id>
+      <id>T1195.002</id>
+    </mitre>
+    <group>axios_rat,supply_chain,c2,ips_alert,paloalto,pci_dss_11.4,gdpr_IV_35.7.d,nist_800_53_SI.4,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+  </rule>
+
+<!-- SUSTAINED C2 BEACONING FROM SAME HOST (Frequency) -->
+  <rule id="100048" level="15" frequency="5" timeframe="120">
+    <if_matched_sid>100041</if_matched_sid>
+    <same_srcip />
+    <description>Axios RAT: CRITICAL - Sustained C2 beaconing to sfrclak.com from $(srcip) via PaloAlto - RAT active on endpoint, isolate immediately</description>
+    <mitre>
+      <id>T1071.001</id>
+      <id>T1041</id>
+      <id>T1573</id>
+    </mitre>
+    <group>axios_rat,supply_chain,c2,beaconing,active_infection,paloalto,pci_dss_11.4,gdpr_IV_35.7.d,nist_800_53_SI.4,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+  </rule>
+
+<!-- MULTIPLE INTERNAL HOSTS CONTACTING C2 (Spread indicator) -->
+  <rule id="100049" level="15" frequency="3" timeframe="600">
+    <if_matched_sid>100041</if_matched_sid>
+    <different_srcip />
+    <description>Axios RAT: CRITICAL - Multiple internal hosts contacting C2 sfrclak.com via PaloAlto - Widespread supply chain compromise, $(frequency) hosts affected</description>
+    <mitre>
+      <id>T1071.001</id>
+      <id>T1195.002</id>
+      <id>T1041</id>
+    </mitre>
+    <group>axios_rat,supply_chain,c2,mass_infection,incident_response,paloalto,pci_dss_11.4,gdpr_IV_35.7.d,nist_800_53_SI.4,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+  </rule>
+  
+<!-- C2 TRAFFIC ALLOWED WITH KNOWN MALWARE APP SIGNATURE -->
+  <rule id="100050" level="15">
+    <if_sid>100042</if_sid>
+    <match>used-by-malware</match>
+    <description>Axios RAT: CRITICAL - C2 traffic ALLOWED with malware application signature confirmed by PaloAlto - $(srcip) actively communicating, isolate immediately</description>
+    <mitre>
+      <id>T1071.001</id>
+      <id>T1041</id>
+      <id>T1195.002</id>
+    </mitre>
+    <group>axios_rat,supply_chain,c2,active_infection,malware_confirmed,paloalto,pci_dss_11.4,gdpr_IV_35.7.d,nist_800_53_SI.4,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+  </rule>
+
+
+
+</group>

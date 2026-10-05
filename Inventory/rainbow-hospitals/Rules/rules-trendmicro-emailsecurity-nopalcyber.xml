@@ -1,0 +1,129 @@
+<!-- Trendmicro Email Security Sample Logs
+
+{"integration": "trendmicro-ems", "trendmicro_ems": {"genTime": "2025-05-23T05:17:39Z", "timestamp": "2025-05-22T12:31:02Z", "deliveryTime": "2025-05-23T05:17:34Z", "sender": "vrchbilling@rainbowhospitals.in", "direction": "out", "messageID": "<MA0PR01MB77853802EC72E1290FFF602ABE99A@MA0PR01MB7785.INDPRD01.PROD.OUTLOOK.COM>", "mailID": "198a6f7c-6b1b-48d4-abeb-399ab4a0bdc2", "recipient": "cashlessmailsend@gmail.com", "action": "Deferred", "tlsInfo": "downstreamTLS: TLS 1.3", "deliveredTo": "alt1.gmail-smtp-in.l.google.com[172.253.116.26]:25", "details": "host alt1.gmail-smtp-in.l.google.com[172.253.116.26] said: 452-4.2.2 The recipient's inbox is out of storage space. Please direct the 452-4.2.2 recipient to 452 4.2.2  https://support.google.com/mail/?p=OverQuotaTemp ffacd0b85a97d-3a35ca4c79dsi12896133f8f.133 - gsmtp (in reply to RCPT TO command)"}}
+
+{"integration": "trendmicro-ems", "trendmicro_ems": {"genTime": "2025-05-23T05:17:40Z", "timestamp": "2025-05-23T05:17:32Z", "deliveryTime": "2025-05-23T05:17:37Z", "sender": "pharmacystores.gdy@rainbowhospitals.in", "direction": "out", "messageID": "<PN2PR01MB5391709446446DDFA2DF8C129F98A@PN2PR01MB5391.INDPRD01.PROD.OUTLOOK.COM>", "subject": "Re: Order from rainbow hospital guindy", "size": 146158, "mailID": "8e78bf86-3714-4565-b664-da1ff5b14601", "recipient": "krishcochennai@yahoo.in", "action": "Delivered", "tlsInfo": "upstreamTLS: TLS 1.3; downstreamTLS: TLS 1.3", "headerFrom": "pharmacystores.gdy@rainbowhospitals.in", "headerTo": ["krishcochennai@yahoo.in", "vinoth.s@rainbowhospitals.in"], "senderIP": "40.93.131.31", "deliveredTo": "mx-apac.mail.gm0.yahoodns.net[106.10.248.73]:25", "attachments": [{"fileName": "Outlook-srn15vi2.png", "sha256": "9e909e29e758e6f43bff25b13e7b12d3b58428eac741c4031ba9b594adac1d0b"}, {"fileName": "Outlook-i0gry1wl.png", "sha256": "9e909e29e758e6f43bff25b13e7b12d3b58428eac741c4031ba9b594adac1d0b"}, {"fileName": "2305krishco.pdf", "sha256": "3fc23e326ee48fa826dd0f3b5eb5344b3553b5248a2210498a1e95153cee1c7d"}], "details": "250 ok dirdel"}}
+
+{"integration": "trendmicro-ems", "trendmicro_ems": {"genTime": "2025-05-23T05:17:43Z", "timestamp": "2025-05-23T05:17:37Z", "deliveryTime": "2025-05-23T05:17:38Z", "sender": "noreply@rainbowhospitals.in", "direction": "out", "messageID": "<20128d9c43dc2c725b1ae210c3ab3410@rainbowhospitals.in>", "subject": "Hospital Visit Booking at Rainbow Children's Hospital", "size": 11572, "mailID": "09258fba-fe34-4f32-b22a-88c64463f4d6", "recipient": "na123@gmail.com", "action": "Bounced", "tlsInfo": "upstreamTLS: TLS 1.3; downstreamTLS: TLS 1.3", "headerFrom": "noreply@rainbowhospitals.in", "headerTo": ["na123@gmail.com"], "senderIP": "40.93.131.1", "deliveredTo": "gmail-smtp-in.l.google.com[142.251.16.26]:25", "details": "host gmail-smtp-in.l.google.com[142.251.16.26] said: 550-5.1.1 The email account that you tried to reach does not exist. Please try 550-5.1.1 double-checking the recipient's email address for typos or 550-5.1.1 unnecessary spaces. For more information, go to 550 5.1.1  https://support.google.com/mail/?p=NoSuchUser af79cd13be357-7cd468f1718si1465505685a.595 - gsmtp (in reply to RCPT TO command)"}}
+
+{"integration": "trendmicro-ems", "trendmicro_ems": {"genTime": "2025-05-23T05:17:43Z", "timestamp": "2025-05-23T03:04:31Z", "deliveryTime": "2025-05-23T05:17:39Z", "sender": "noreply@rainbowhospitals.in", "direction": "out", "messageID": "<e2c5c824f105dc3f153483f1800f937b@www.rainbowhospitals.in>", "mailID": "cd4120d8-42fc-4613-b7ac-ecc91f3a5b5d", "recipient": "afiazsaher@gmail.com", "action": "Deferred", "tlsInfo": "downstreamTLS: TLS 1.3", "deliveredTo": "alt1.gmail-smtp-in.l.google.com[172.253.116.26]:25", "details": "host alt1.gmail-smtp-in.l.google.com[172.253.116.26] said: 452-4.2.2 The recipient's inbox is out of storage space. Please direct the 452-4.2.2 recipient to 452 4.2.2  https://support.google.com/mail/?p=OverQuotaTemp ffacd0b85a97d-3a35ca7f599si12579069f8f.334 - gsmtp (in reply to RCPT TO command)"}}
+
+{"integration": "trendmicro-ems", "trendmicro_ems": {"genTime": "2025-05-23T05:17:47Z", "timestamp": "2025-05-23T05:17:38Z", "deliveryTime": "2025-05-23T05:17:43Z", "direction": "in", "messageID": "<20250523051738.4D66310000AA8@repost01.tmes.trendmicro.com>", "subject": "Undelivered Mail Returned to Sender", "size": 16070, "mailID": "7800c60c-1127-4db1-95ce-06d3aa30a72a", "recipient": "noreply@rainbowhospitals.in", "action": "Delivered", "tlsInfo": "upstreamTLS: TLS 1.3; downstreamTLS: TLS 1.3", "headerFrom": "no-reply@tmes.trendmicro.com", "headerTo": ["noreply@rainbowhospitals.in"], "senderIP": "18.208.22.143", "deliveredTo": "rainbowhospitals-in.mail.protection.outlook.com[52.101.145.2]:25", "attachments": [{"fileName": "Notification"}, {"fileName": "Delivery report"}, {"fileName": "Undelivered Message Headers"}], "embeddedUrls": ["https://support.google.com/mail/?p=NoSuchUser"], "details": "250 2.6.0 <20250523051738.4D66310000AA8@repost01.tmes.trendmicro.com> [InternalId=121753732911160, Hostname=MAZPR01MB6057.INDPRD01.PROD.OUTLOOK.COM] 31613 bytes in 0.149, 206.317 KB/sec Queued mail for delivery"}}
+
+{"integration": "trendmicro-ems", "trendmicro_ems": {"genTime": "2025-05-23T05:18:04Z", "timestamp": "2025-05-23T05:17:54Z", "sender": "kavya.9538886333@gmail.com", "direction": "in", "messageID": "<CC9BC982-9A57-4FB3-A651-A60EEF2D1CD3@gmail.com>", "size": 9316727, "mailID": "2e3a1713-7439-4c4d-a59b-7d86415ac749", "recipient": "corpblr@rainbowhospitals.in", "action": "Scanning in sandbox", "tlsInfo": "upstreamTLS: TLS 1.3", "headerFrom": "kavya.9538886333@gmail.com", "headerTo": ["corpblr@rainbowhospitals.in"], "senderIP": "209.85.210.169", "attachments": [{"fileName": "Policy Kit_PROPRM050081026.pdf", "sha256": "17855fbf151493a7b8216bcacab5e76de0a41c7d0e2c6ae143b4d3c2e0542f01"}, {"fileName": "image0.jpeg", "sha256": "b89b900357bc6d90490eb65018793690309cc9a95184d097aa1ff93a6e95c48e"}, {"fileName": "image1.jpeg", "sha256": "f7a2bf6331269958b58cd13357d321bdb3b4e51551ad28e11e6fde29b1ac6d49"}, {"fileName": "image2.jpeg", "sha256": "3b7679a8f7335fe83423fe9234456efd6266b418dbed468a206685047d0136b0"}, {"fileName": "image3.jpeg", "sha256": "f2adf1a8fcc6e8a42e082e32211bdd9d46ad0644abd9fd4be628fd5241800b00"}, {"fileName": "image4.jpeg", "sha256": "0792713bbe405bd75ed3820d016d60d37f5138f4da6972f28df8d753f9081620"}, {"fileName": "image5.jpeg", "sha256": "f33735d539384ef21653a70a24e98a0fc207fae6f5d3b32bc319876a4a10e38c"}, {"fileName": "image6.jpeg", "sha256": "41793195560fe68dfb1e4b11358fbec9937556b9c82c8ca741f1b58f4383b5c3"}], "embeddedUrls": ["www.medibuddy.in", "www.manipalcigna.com", "https://www.manipalcigna.com/locate-us", "https://www.manipalcigna.com/mymanipalcignaapp", "https://www.manipalcigna.com/claims", "https://www.manipalcigna.com/downloads/claims", "https://eservicing.manipalcigna.com/login", "https://www.cioins.co.in/Ombudsman", "https://eservicing.manipalcigna.com/document-vault", "https://www.manipalcigna.com/grievance-redressal", "https://igms.irda.gov.in/"]}}
+
+-->
+
+<!-- /var/ossec/etc/rules/trendmicro_security.xml -->
+<group name="trendmicro_ems_security,">
+
+    <!-- Base Rule -->
+  <rule id="115100" level="0" noalert="1">
+    <decoded_as>json</decoded_as>
+    <field name="integration">trendmicro-ems</field>
+    <description>Trend Micro Email Security: Log received</description>
+  </rule>
+  
+    <!-- Base rule - Email Delivered (115101) -->
+  <rule id="115101" level="3">
+    <if_sid>115100</if_sid>
+    <field name="data.trendmicro_ems.action">Delivered</field>
+    <description>Email Delivered</description>
+    <options>no_full_log</options>
+  </rule>
+
+  <!-- Malware Detonation Attempt (115101) -->
+  <rule id="115102" level="3">
+    <if_sid>115100</if_sid>
+    <field name="trendmicro_ems.action">Scanning in sandbox</field>
+    <description>SECURITY ALERT: Suspicious email quarantined for sandbox analysis</description>
+    <group>malware_analysis</group>
+  </rule>
+
+  <!-- Executable Attachment Detection (115102) -->
+  <rule id="115103" level="11">
+    <if_sid>115100</if_sid>
+    <field name="trendmicro_ems.attachments.fileName" type="pcre2">\.(exe|js|vbs|wsf|scr|jar|bat|cmd|dll|lnk|hta|ppam)$</field>
+    <description>MALWARE ALERT: Email contains executable attachment</description>
+    <group>malware_detection</group>
+  </rule>
+
+  <!-- Phishing Attempt Detection (115103) WIP -->
+  <rule id="115104" level="10">
+    <if_sid>115100</if_sid>
+    <field name="trendmicro_ems.embeddedUrls" type="pcre2">>=5</field>
+    <description>PHISHING ATTEMPT: Email contains suspicious URLs</description>
+    <group>phishing_detection</group>
+  </rule>
+
+  <!-- Credential Harvesting (115104) --> <!-- Improvement - Exclude internal email communication -->
+  <rule id="115105" level="3">
+    <if_sid>115100</if_sid>
+    <field name="trendmicro_ems.subject" type="pcre2">(?i)password|login|credentials|account\s+verification|security\s+alert|urgent</field>
+    <description>CREDENTIAL HARVESTING: Suspicious subject line detected</description>
+    <group>credential_theft</group>
+  </rule>
+
+  <!-- Suspicious Sender Domains (115105) --> <!-- Improvement - Check sender is rainbow hospital email or not -->
+  <rule id="115106" level="3">
+    <if_sid>115100</if_sid>
+    <field name="trendmicro_ems.sender" type="pcre2">@(gmail\.com|yahoo\.com|hotmail\.com|outlook\.com|protonmail\.com|aol\.com|icloud\.com)$</field>
+    <field name="trendmicro_ems.direction">in</field>
+    <description>SUSPICIOUS SENDER: External personal email account used for business communication</description>
+    <group>suspicious_sender</group>
+  </rule>
+
+  <!-- Large Attachment Alert > 10MB (115106)  WIP -->
+  
+  <rule id="115107" level="6">
+    <if_sid>115100</if_sid>
+    <field name="trendmicro_ems.size">>=10485760</field>
+    <description>Trend Micro: Large email with multiple attachments</description>
+    <group>data_exfiltration</group>
+  </rule>
+  
+
+  <!-- Multiple Recipients Alert (115107) -->
+  <rule id="115108" level="5" frequency="10" timeframe="300">
+    <if_matched_sid>115101</if_matched_sid> <!-- Email Delivered -->
+    <same_field>trendmicro_ems.subject</same_field>
+    <same_field>trendmicro_ems.sender</same_field>
+    <different_field>trendmicro_ems.recipient</different_field>
+    <description>Trend Micro: Mass email to multiple recipients</description>
+    <group>bulk_email</group>
+  </rule>
+
+  <!-- Deferred Messages (115108) --> <!-- Improve -->
+  <rule id="115109" level="3">
+    <if_sid>115100</if_sid>
+    <field name="trendmicro_ems.action">Deferred</field>
+    <description>DELIVERY ISSUE: Email delivery was delayed or postponed by the server</description>
+    <options>no_full_log</options>
+    <group>delivery_issues</group>
+  </rule>
+  
+<!-- Multiple malware detonation attempts detected -->
+<rule id="115110" level="3" frequency="5" timeframe="300">
+    <if_matched_sid>115102</if_matched_sid>
+    <description>SECURITY ALERT: Multiple suspicious emails submitted for sandbox analysis (5 events within 5 minutes).</description>
+    <group>trendmicro,email_security,malware_analysis,correlation</group>
+</rule>
+
+<!-- Single sender triggering repeated sandbox analysis -->
+<rule id="115111" level="3" frequency="5" timeframe="300">
+    <if_matched_sid>115102</if_matched_sid>
+    <same_field>trendmicro_ems.sender</same_field>
+    <description>SECURITY ALERT: Sender triggered repeated email sandbox analysis (3 events within 5 minutes).</description>
+    <group>trendmicro,email_security,malware_analysis,correlation</group>
+</rule>
+
+<!-- Single recipient targeted by repeated sandboxed emails -->
+<rule id="115112" level="3" frequency="5" timeframe="300">
+    <if_matched_sid>115102</if_matched_sid>
+    <same_field>trendmicro_ems.recipient</same_field>
+    <description>SECURITY ALERT: Recipient received repeated emails submitted for sandbox analysis (3 events within 5 minutes).</description>
+    <group>trendmicro,email_security,malware_analysis,correlation</group>
+</rule>
+
+  
+</group>

@@ -1,0 +1,1669 @@
+<!--
+  -  Windows Event Channel ruleset for the Security channel
+  -  Created by Wazuh, Inc.
+  -  Copyright (C) 2015-2021, Wazuh Inc.
+  -  This program is a free software; you can redistribute it and/or modify it under the terms of GPLv2.
+-->
+
+<!--
+  -  ID range: 60100 - 60599
+-->
+
+<var name="MS_FREQ">8</var>
+
+<group name="windows,windows_security,">
+
+  <rule id="60100" level="0">
+    <if_sid>60001</if_sid>
+    <field name="win.system.severityValue">^INFORMATION$</field>
+    <description>Windows Security informational event</description>
+    <options>no_full_log</options>
+    <mitre>
+      <id>T1005</id>
+    </mitre>
+  </rule>
+
+  <rule id="60101" level="0">
+    <if_sid>60001</if_sid>
+    <field name="win.system.severityValue">^WARNING$</field>
+    <description>Windows Security warning event</description>
+    <options>no_full_log</options>
+    <group>gpg13_4.12,</group>
+    <mitre>
+      <id>T1005</id>
+    </mitre>
+  </rule>
+
+  <rule id="60102" level="5">
+    <if_sid>60001</if_sid>
+    <field name="win.system.severityValue">^ERROR$</field>
+    <description>Windows Security error event</description>
+    <options>no_full_log</options>
+    <group>system_error,gpg13_4.3,gdpr_IV_35.7.d,</group>
+    <mitre>
+      <id>T1005</id>
+    </mitre>
+  </rule>
+
+  <rule id="60103" level="0">
+    <if_sid>60001</if_sid>
+    <field name="win.system.severityValue">^AUDIT_SUCCESS$|^success$</field>
+    <description>Windows audit success event</description>
+    <options>no_full_log</options>
+  </rule>
+
+  <rule id="60104" level="3" noalert="1">
+    <if_sid>60001</if_sid>
+    <field name="win.system.severityValue">^AUDIT_FAILURE$|^failure$</field>
+    <description>Windows audit failure event</description>
+    <group>pci_dss_10.6.1,gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_AU.6,tsc_CC7.2,tsc_CC7.3,</group>
+    <options>no_full_log</options>
+  </rule>
+
+  <rule id="60105" level="3">
+    <if_sid>60104</if_sid>
+    <field name="win.system.eventID">^529$|^530$|^531$|^532$|^533$|^534$|^535$|^536$|^537$|^539$|^4625$</field>
+    <description>Windows Logon Failure</description>
+    <group>authentication_failed,pci_dss_10.2.4,pci_dss_10.2.5,gpg13_7.1,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.1,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1078</id>
+    </mitre>
+  </rule>
+
+  <!--{"win":{"system":{"providerName":"Microsoft-Windows-Security-Auditing","providerGuid":"{54849625-5478-4994-A5BA-3E3B0328C30D}","eventID":"4624","version":"1","level":"0","task":"12544","opcode":"0","keywords":"0x802000000000000","systemTime":"2018-12-18T10:55:48.073081500Z","eventRecordID":"7017","processID":"548","threadID":"3212","channel":"Security","computer":"qnu","severityValue":"AUDIT_SUCCESS","message":"L&#8217;ouverture de session d&#8217;un compte s&#8217;est correctement d&#233;roul&#233;e."},"eventdata":{"subjectUserSid":"S-1-5-18","subjectUserName":"QNU$","subjectDomainName":"WORKGROUP","subjectLogonId":"0x3e7","targetUserSid":"S-1-5-18","targetUserName":"Syst&#232;me","targetDomainName":"AUTORITE NT","targetLogonId":"0x3e7","logonType":"5","logonProcessName":"Advapi  ","authenticationPackageName":"Negotiate","workstationName":"-","logonGuid":"{00000000-0000-0000-0000-000000000000}","transmittedServices":"-","lmPackageName":"-","keyLength":"0","processId":"0x21c","processName":"C:\\\\Windows\\\\System32\\\\services.exe","ipAddress":"-","ipPort":"-","impersonationLevel":"%%1833"}}}-->
+
+  <rule id="60106" level="3" noalert="1">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^528$|^540$|^673$|^4624$|^4769$</field>
+    <description>Windows Logon Success</description>
+    <options>no_full_log</options>
+    <group>authentication_success,pci_dss_10.2.5,gpg13_7.1,gpg13_7.2,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.14,nist_800_53_AC.9,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1078</id>
+    </mitre>
+  </rule>
+
+  <rule id="60107" level="4">
+    <if_sid>60104</if_sid>
+    <field name="win.system.eventID">^577$|^4673$</field>
+    <description>Failed attempt to perform a privileged operation</description>
+    <options>no_full_log</options>
+    <group>pci_dss_10.2.2,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.14,nist_800_53_AC.6,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1078</id>
+    </mitre>
+  </rule>
+
+  <!-- Rules based on AUDIT SUCCESS -->
+
+  <rule id="60108" level="3">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^682$|^683$|^4778$|^4779$</field>
+    <description>Session reconnected/disconnected to winstation</description>
+    <options>no_full_log</options>
+    <group>authentication_success,pci_dss_8.1.5,gdpr_IV_35.7.d,hipaa_164.312.a.1,nist_800_53_AC.2,tsc_CC6.1,</group>
+    <mitre>
+      <id>T1078</id>
+    </mitre>
+  </rule>
+
+  <rule id="60109" level="3">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^624$|^626$|^4720$|^4722$</field>
+    <description>User account enabled or created</description>
+    <options>no_full_log</options>
+    <group>adduser,account_changed,</group>
+    <group>pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1098</id>
+    </mitre>
+  </rule>
+
+  <rule id="60110" level="3">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^628$|^642$|^685$|^4738$|^4781$</field>
+    <description>User account changed</description>
+    <options>no_full_log</options>
+    <group>account_changed,</group>
+    <group>pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1098</id>
+    </mitre>
+  </rule>
+
+  <rule id="60111" level="3">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^630$|^629$|^4725$|^4726$</field>
+    <description>User account disabled or deleted</description>
+    <options>no_full_log</options>
+    <group>adduser,account_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1098</id>
+    </mitre>
+    <mitre>
+      <id>T1531</id>
+    </mitre>
+  </rule>
+
+  <rule id="60112" level="8">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^612$|^643$|^4719$|^4907$|^4912$|^4719$</field>
+    <description>Windows Audit Policy changed</description>
+    <options>no_full_log</options>
+    <group>policy_changed,pci_dss_10.6.1,gpg13_10.1,gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_AU.6,tsc_CC7.2,tsc_CC7.3,</group>
+  </rule>
+
+  <rule id="60113" level="5">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^632$|^4728$|^633$|^4729$|^636$|^4732$|^637$|^4733$|^639$|^4735$|
+            |^641$|^4737$|^637$|^4733$|^659$|^4755$|^660$|^4766$|^668$|^4764$|
+            |^649$|^4745$|^650$|^4746$|^651$|^4747$|^654$|^4750$|^655$|^4751$|
+            |^656$|^4752$|^659$|^4755$|^660$|^4756$|^661$|^4757$|^664$|^4760$|
+            |^665$|^4761$|^666$|^4762$</field>
+    <description>Group Account Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60114" level="8">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^640$</field>
+    <description>General account database changed</description>
+    <options>no_full_log</options>
+    <group>adduser,account_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1098</id>
+    </mitre>
+  </rule>
+
+  <rule id="60115" level="9">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^644$|^4740$</field>
+    <description>User account locked out (multiple login errors)</description>
+    <options>no_full_log</options>
+    <group>authentication_failures,pci_dss_8.1.6,pci_dss_11.4,gpg13_7.5,gdpr_IV_35.7.d,hipaa_164.312.a.1,nist_800_53_AC.7,nist_800_53_SI.4,tsc_CC6.1,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1110</id>
+    </mitre>
+    <mitre>
+      <id>T1531</id>
+    </mitre>
+  </rule>
+
+  <rule id="60116" level="7">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^513$|^4609$</field>
+    <description>Windows is shutting down</description>
+    <options>no_full_log</options>
+    <group>system_shutdown,</group>
+    <mitre>
+      <id>T1529</id>
+    </mitre>
+  </rule>
+
+  <rule id="60117" level="9">
+    <if_sid>60100</if_sid>
+    <field name="win.system.eventID">^1102$</field>
+    <description>Windows audit log was cleared</description>
+    <options>no_full_log</options>
+    <group>logs_cleared,pci_dss_10.6.1,gpg13_10.1,gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_AU.6,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1070.004</id>
+    </mitre>
+  </rule>
+
+  <rule id="60118" level="3">
+    <if_sid>60106</if_sid>
+    <field name="win.eventdata.workstationName">\.+</field>
+    <field name="win.eventdata.logonType">^2$</field>
+    <description>Windows Workstation Logon Success</description>
+    <options>no_full_log</options>
+    <group>authentication_success,pci_dss_10.2.5,gpg13_7.1,gpg13_7.2,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.14,nist_800_53_AC.9,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1078</id>
+    </mitre>
+  </rule>
+
+  <rule id="60119" level="3">
+    <if_sid>60106</if_sid>
+    <if_fts />
+    <description>First time this user logged in this system</description>
+    <options>no_full_log</options>
+    <group>authentication_success,pci_dss_10.2.5,gpg13_7.1,gpg13_7.2,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.14,nist_800_53_AC.9,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1078</id>
+    </mitre>
+  </rule>
+
+  <rule id="60120" level="0">
+    <if_sid>60104</if_sid>
+    <field name="win.system.eventID">^680$</field>
+    <description>Windows login attempt (ignored). Duplicated</description>
+    <options>no_full_log</options>
+  </rule>
+
+  <rule id="60121" level="3">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^646$|^645$|^647$|^4741$|^4742$|^4743$</field>
+    <description>Computer account added/changed/deleted</description>
+    <options>no_full_log</options>
+    <group>account_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1098</id>
+    </mitre>
+    <mitre>
+      <id>T1136</id>
+    </mitre>
+    <mitre>
+      <id>T1531</id>
+    </mitre>
+  </rule>
+
+    <!-- Granular windows login rules -->
+  <rule id="60122" level="3">
+    <if_sid>60105</if_sid>
+    <field name="win.system.eventID">^529$|^4625$</field>
+    <field name="win.eventdata.targetUserName" negate="yes">.*\$</field> <!-- Exclude machine accounts ending with $ -->
+    <field name="win.eventdata.subjectUserName" negate="yes">^administrator$</field> <!-- Exclude subject user name "administrator" -->
+    <description>Logon Failure - Unknown user or bad password</description>
+    <group>authentication_failed,pci_dss_10.2.4,pci_dss_10.2.5,gpg13_7.1,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.1,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1531</id>
+    </mitre>
+  </rule>
+
+  <rule id="60123" level="5">
+    <if_sid>60105</if_sid>
+    <field name="win.system.eventID">^530$</field>
+    <description>Logon Failure - Account logon time restriction violation</description>
+    <options>no_full_log</options>
+    <group>authentication_failed,login_denied,pci_dss_10.2.5,pci_dss_8.1.5,gpg13_7.1,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.b,hipaa_164.312.a.1,nist_800_53_AU.14,nist_800_53_AC.7,nist_800_53_AC.2,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,tsc_CC6.1,</group>
+    <mitre>
+      <id>T1531</id>
+    </mitre>
+  </rule>
+
+  <rule id="60124" level="5">
+    <if_sid>60105</if_sid>
+    <field name="win.system.eventID">^531$</field>
+    <description>Logon Failure - Account currently disabled</description>
+    <options>no_full_log</options>
+    <group>authentication_failed,login_denied,pci_dss_10.2.5,pci_dss_8.1.4,gpg13_7.5,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.b,hipaa_164.312.a.1,nist_800_53_AU.14,nist_800_53_AC.7,nist_800_53_AC.2,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,tsc_CC6.2,tsc_CC6.3,tsc_CC6.4,</group>
+    <mitre>
+      <id>T1531</id>
+    </mitre>
+  </rule>
+
+  <rule id="60125" level="5">
+    <if_sid>60105</if_sid>
+    <field name="win.system.eventID">^532$</field>
+    <description>Logon Failure - Specified account expired</description>
+    <options>no_full_log</options>
+    <group>authentication_failed,login_denied,pci_dss_10.2.5,pci_dss_8.1.5,gpg13_7.5,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.b,hipaa_164.312.a.1,nist_800_53_AU.14,nist_800_53_AC.7,nist_800_53_AC.2,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,tsc_CC6.1,</group>
+    <mitre>
+      <id>T1531</id>
+    </mitre>
+  </rule>
+
+  <rule id="60126" level="7">
+    <if_sid>60105</if_sid>
+    <field name="win.system.eventID">^533$</field>
+    <description>Logon Failure - User not allowed to login at this computer</description>
+    <options>no_full_log</options>
+    <group>authentication_failed,login_denied,pci_dss_10.2.4,pci_dss_10.2.5,gpg13_7.5,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.1,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1531</id>
+    </mitre>
+  </rule>
+
+  <rule id="60127" level="5">
+    <if_sid>60105</if_sid>
+    <field name="win.system.eventID">^534$</field>
+    <description>Logon Failure - User not granted logon type</description>
+    <options>no_full_log</options>
+    <group>authentication_failed,pci_dss_10.2.4,pci_dss_10.2.5,gpg13_7.5,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.1,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1531</id>
+    </mitre>
+  </rule>
+
+  <rule id="60128" level="5">
+    <if_sid>60105</if_sid>
+    <field name="win.system.eventID">^535$</field>
+    <description>Logon Failure - Account's password expired</description>
+    <options>no_full_log</options>
+    <group>authentication_failed,pci_dss_10.2.5,pci_dss_8.2.4,gpg13_7.5,gdpr_IV_32.2,hipaa_164.312.b,hipaa_164.312.d,nist_800_53_AU.14,nist_800_53_AC.7,nist_800_53_IA.5,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1531</id>
+    </mitre>
+  </rule>
+
+  <rule id="60129" level="5">
+    <if_sid>60105</if_sid>
+    <field name="win.system.eventID">^536$|^537$</field>
+    <description>Logon Failure - Internal error</description>
+    <options>no_full_log</options>
+    <group>authentication_failed,pci_dss_10.2.4,pci_dss_10.2.5,gpg13_7.1,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.1,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1531</id>
+    </mitre>
+  </rule>
+
+  <rule id="60130" level="7">
+    <if_sid>60105</if_sid>
+    <field name="win.system.eventID">^539$</field>
+    <description>Logon Failure - Account locked out</description>
+    <options>no_full_log</options>
+    <group>authentication_failed,pci_dss_10.2.4,pci_dss_10.2.5,pci_dss_8.1.6,gpg13_7.5,gpg13_7.1,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.b,hipaa_164.312.a.1,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.1,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1531</id>
+    </mitre>
+  </rule>
+
+  <rule id="60131" level="3">
+    <if_sid>60104</if_sid>
+    <field name="win.system.eventID">^673$|^675$|^681$|^4769$</field>
+    <description>Windows DC Logon Failure</description>
+    <group>authentication_failed,pci_dss_10.2.4,pci_dss_10.2.5,gpg13_7.1,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.1,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+  </rule>
+
+  <rule id="60132" level="3">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^520$|^4616$</field>
+    <description>System time changed</description>
+    <options>no_full_log</options>
+    <group>time_changed,pci_dss_10.6.1,gpg13_1.3,gpg13_4.13,gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_AU.6,tsc_CC7.2,tsc_CC7.3,</group>
+  </rule>
+
+  <rule id="60133" level="3">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^671$|^4767$</field>
+    <description>User account unlocked</description>
+    <options>no_full_log</options>
+    <group>account_changed,pci_dss_10.2.5,pci_dss_8.1.6,gpg13_7.10,gdpr_IV_32.2,hipaa_164.312.b,hipaa_164.312.a.1,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1098</id>
+    </mitre>
+  </rule>
+
+  <rule id="60134" level="8">
+    <if_sid>60113</if_sid>
+    <field name="win.system.eventID">^631$|^635$|^658$</field>
+    <description>Security enabled group created</description>
+    <options>no_full_log</options>
+    <group>adduser,account_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484.001</id>
+    </mitre>
+  </rule>
+
+  <rule id="60135" level="8">
+    <if_sid>60113</if_sid>
+    <field name="win.system.eventID">^634$|^638$|^662$</field>
+    <description>Security enabled group deleted</description>
+    <options>no_full_log</options>
+    <group>adduser,account_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1531</id>
+    </mitre>
+  </rule>
+
+  <rule id="60136" level="3">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^4608$</field>
+    <description>Windows is starting up</description>
+    <options>no_full_log</options>
+  </rule>
+
+  <rule id="60137" level="3" noalert="1"> <!-- To reduce noise alerts - noalert set to 1. -->
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^538$|^551$|^4634$|^4647$</field>
+    <description>Windows User Logoff</description>
+    <options>no_full_log</options>
+    <group>pci_dss_10.2.5,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+  </rule>
+
+  <!-- Granular group rules -->
+  <rule id="60138" level="5">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^631$|^4727$|^635$|^4731$|^658$|^4754$|^648$|^4744$|^653$|
+                ^4749$|^663$|^4759$</field>
+    <description>Group Account Created</description>
+    <options>no_full_log</options>
+    <group>group_created,win_group_created,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60139" level="5">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^634$|^4730$|^638$|^4734$|^662$|^4758$|^652$|^4748$|
+            ^657$|^4753$|^667$|^4763$</field>
+    <description>Group Account Deleted</description>
+    <options>no_full_log</options>
+    <group>group_deleted,win_group_deleted,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60140" level="5">
+    <if_sid>60138</if_sid>
+    <field name="win.system.eventID">^631$|^4727$</field>
+    <description>Security Enabled Global Group Created</description>
+    <options>no_full_log</options>
+    <group>group_created,win_group_created,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60141" level="3">   <!-- Reduced the rule level from 5 to 3 and created aggregation rule -->
+    <if_sid>60113</if_sid>
+    <field name="win.system.eventID">^632$|^4728$</field>
+    <description>Security Enabled Global Group Member Added</description>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60142" level="5">
+    <if_sid>60113</if_sid>
+    <field name="win.system.eventID">^633$|^4729$</field>
+    <description>Security Enabled Global Group Member Removed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60143" level="5">
+    <if_sid>60138</if_sid>
+    <field name="win.system.eventID">^635$|^4731$</field>
+    <description>Security Enabled Local Group Created</description>
+    <options>no_full_log</options>
+    <group>group_created,win_group_created,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60144" level="5">
+    <if_sid>60113</if_sid>
+    <field name="win.system.eventID">^636$|^4732$</field>
+    <description>Security Enabled Local Group Member Added</description>
+    <options>no_full_log</options>
+   <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60145" level="5">
+    <if_sid>60113</if_sid>
+    <field name="win.system.eventID">^637$|^4733$</field>
+    <description>Security Enabled Local Group Member Removed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60146" level="5">
+    <if_sid>60139</if_sid>
+    <field name="win.system.eventID">^638$|^4734$</field>
+    <description>Security Enabled Local Group Deleted</description>
+    <options>no_full_log</options>
+    <group>group_deleted,win_group_deleted,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60147" level="5">
+    <if_sid>60113</if_sid>
+    <field name="win.system.eventID">^639$|^4735$</field>
+    <description>Security Enabled Local Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60148" level="5">
+    <if_sid>60113</if_sid>
+    <field name="win.system.eventID">^641$|^4737$</field>
+    <description>Security Enabled Global Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60149" level="5">
+    <if_sid>60138</if_sid>
+    <field name="win.system.eventID">^658$|^4754$</field>
+    <description>Security Enabled Universal Group Created</description>
+    <options>no_full_log</options>
+    <group>group_created,win_group_created,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60150" level="5">
+    <if_sid>60113</if_sid>
+    <field name="win.system.eventID">^659$|^4755$</field>
+    <description>Security Enabled Universal Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60151" level="5">
+    <if_sid>60113</if_sid>
+    <field name="win.system.eventID">^660$|^4756$</field>
+    <description>Security Enabled Universal Group Member Added</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60152" level="5">
+    <if_sid>60113</if_sid>
+    <field name="win.system.eventID">^661$|^4757$</field>
+    <description>Security Enabled Universal Group Member Removed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60153" level="5">
+    <if_sid>60139</if_sid>
+    <field name="win.system.eventID">^662$|^4758$</field>
+    <description>Security Enabled Universal Group Deleted</description>
+    <options>no_full_log</options>
+    <group>group_deleted,win_group_deleted,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60154" level="12">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-32-544$</field>
+    <description>Administrators Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60155" level="5">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^%{S-1-1-0}$|^S-1-1-0$</field>
+    <description>Everyone Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60156" level="12">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-9$</field>
+    <description>Enterprise Domain Controllers Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60157" level="5">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-11$</field>
+    <description>Authenticated Users Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60158" level="5">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-13$</field>
+    <description>Terminal Server Users Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60159" level="12">
+    <if_sid>60141,60142</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-\S+-512$</field>
+    <description>Domain Admins Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60160" level="5">
+    <if_sid>60141,60142</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-\S+-513$</field>
+    <description>Domain Users Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60161" level="0">
+    <if_sid>60160,60141</if_sid>
+    <field name="win.eventdata.subjectAccountName">^None$</field>
+    <description>Local User Group NONE</description>
+    <options>no_full_log</options>
+    <info>Bogus group user added to upon creation</info>
+  </rule>
+
+  <rule id="60162" level="12">
+    <if_sid>60141,60142</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-\S+-514$</field>
+    <description>Domain Guests Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60163" level="5">
+    <if_sid>60141,60142</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-\S+-515$</field>
+    <description>Domain Computers Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60164" level="12">
+    <if_sid>60141,60142</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-\S+-516$</field>
+    <description>Domain Controllers Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60165" level="10">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-\S+-517$</field>
+    <description>Cert Publishers Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60166" level="12">
+    <if_sid>60149,60150,60151,60152</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-\S+-518$</field>
+    <description>Schema Admins Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60167" level="12">
+    <if_sid>60149,60150,60151,60152</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-\S+-519$</field>
+    <description>Enterprise Admins Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60168" level="10">
+    <if_sid>60141,60142</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-\S+-520$</field>
+    <description>Group Policy Creator Owners Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60169" level="10">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-\S+-553$</field>
+    <description>RAS and IAS Servers Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60170" level="5">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-\S+-545$</field>
+    <description>Users Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60171" level="12">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-\S+-546$</field>
+    <description>Guests Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60172" level="10">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-\S+-547$</field>
+    <description>Power Users Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60173" level="10">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-32-548$</field>
+    <description>Account Operators Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60174" level="10">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-32-549$</field>
+    <description>Server Operators Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60175" level="8">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-32-550$</field>
+    <description>Print Operators Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484.001</id>
+    </mitre>
+  </rule>
+
+  <rule id="60176" level="12">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-\S+-551$</field>
+    <description>Backup Operators Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60177" level="10">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-\S+-552$</field>
+    <description>Replicators Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60178" level="8">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-32-554$</field>
+    <description>Pre-Windows 2000 Compatible Access Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484.001</id>
+    </mitre>
+  </rule>
+
+  <rule id="60179" level="10">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-32-555$</field>
+    <description>Remote Desktop Users Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60180" level="10">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-32-556$</field>
+    <description>Network Configuration Operators Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60181" level="10">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-32-557$</field>
+    <description>Incoming Forest Trust Builders Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60182" level="8">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-32-558$</field>
+    <description>Performance Monitor Users Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484.001</id>
+    </mitre>
+  </rule>
+
+  <rule id="60183" level="8">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-32-559$</field>
+    <description>Performance Log Users Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484.001</id>
+    </mitre>
+  </rule>
+
+  <rule id="60184" level="8">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-32-560$</field>
+    <description>Windows Authorization Access Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484.001</id>
+    </mitre>
+  </rule>
+
+  <rule id="60185" level="8">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-32-561$</field>
+    <description>Terminal Server License Servers Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484.001</id>
+    </mitre>
+  </rule>
+
+  <rule id="60186" level="8">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-32-562$</field>
+    <description>Distributed COM Users Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484.001</id>
+    </mitre>
+  </rule>
+
+  <rule id="60187" level="12">
+    <if_sid>60149,60150,60151,60152</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-21\S+-498$</field>
+    <description>Enterprise Read-only Domain Controllers Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60188" level="12">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-21\S+-521$</field>
+    <description>Read-only Domain Controllers Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60189" level="12">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-32-569$</field>
+    <description>Cryptographic Operators Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60190" level="10">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-21\S+-571$</field>
+    <description>Allowed Read Only Domain Ccontroller Password Replication Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60191" level="10">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-21\S+-572$</field>
+    <description>Denied RODC Password Replication Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60192" level="10">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-32-573$</field>
+    <description>Event Log Readers Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60193" level="10">
+    <if_sid>60144,60145</if_sid>
+    <field name="win.eventdata.targetSid">^S-1-5-\S+-574$</field>
+    <description>Certificate Service DCOM Access Group Changed</description>
+    <options>no_full_log</options>
+    <group>group_changed,win_group_changed,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <!-- Ignore Login events, type 5, from Advapi for:
+    -  LOCAL SERVICE and NETWORK SERVICE.
+    -->
+  <rule id="60194" level="0">
+    <if_sid>60106,60137</if_sid>
+    <field name="win.system.eventID">^528$|^538$|^540$|^4624$</field>
+    <field name="win.eventdata.subjectUserName">^LOCAL SERVICE|^NETWORK SERVICE|^ANONYMOUS LOGON</field>
+    <description>Windows Logon Success (ignored)</description>
+    <options>no_full_log</options>
+    <group>pci_dss_10.2.5,gpg13_7.1,gpg13_7.2,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.14,nist_800_53_AC.9,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+  </rule>
+
+  <rule id="60195" level="10">
+    <if_sid>60131</if_sid>
+    <field name="win.eventdata.failureCode">0x1F</field>
+    <description>Windows DC integrity check on decrypted</description>
+    <options>no_full_log</options>
+    <description>field failed</description>
+    <group>authentication_failed,attacks,pci_dss_10.2.4,pci_dss_10.2.5,pci_dss_11.4,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.14,nist_800_53_AC.7,nist_800_53_SI.4,tsc_CC6.1,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1207</id>
+    </mitre>
+  </rule>
+
+  <rule id="60196" level="10">
+    <if_sid>60131</if_sid>
+    <field name="win.eventdata.failureCode">0x22</field>
+    <description>Windows DC - Possible replay attack</description>
+    <options>no_full_log</options>
+    <group>authentication_failed,attacks,pci_dss_10.2.4,pci_dss_10.2.5,pci_dss_11.4,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.14,nist_800_53_AC.7,nist_800_53_SI.4,tsc_CC6.1,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1207</id>
+    </mitre>
+    <mitre>
+      <id>T1550.002</id>
+    </mitre>
+  </rule>
+
+  <rule id="60197" level="7">
+    <if_sid>60131</if_sid>
+    <field name="win.eventdata.failureCode">0x25</field>
+    <description>Windows DC - Clock skew too great</description>
+    <options>no_full_log</options>
+    <group>authentication_failed,attacks,pci_dss_10.2.4,pci_dss_10.2.5,pci_dss_11.4,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.14,nist_800_53_AC.7,nist_800_53_SI.4,tsc_CC6.1,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1207</id>
+    </mitre>
+  </rule>
+
+<!-- Detail logon rules -->
+  <rule id="60200" level="3">
+    <if_sid>60106</if_sid>
+    <field name="win.system.eventID">^4624$</field>
+    <field name="win.eventdata.logonType">^8$</field>
+    <description>IIS NetworkCleartext Logon Success</description>
+    <options>no_full_log</options>
+    <group>pci_dss_10.2.5,gpg13_7.1,gpg13_7.2,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.14,nist_800_53_AC.9,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+  </rule>
+
+  <rule id="60201" level="0">
+    <if_sid>60137</if_sid>
+    <field name="win.system.eventID">^4634$</field>
+    <field name="win.eventdata.logonType">^8$</field>
+    <description>MS Exchange User Logoff</description>
+    <options>no_full_log</options>
+    <group>pci_dss_10.2.5,gpg13_7.1,gpg13_7.2,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+  </rule>
+
+  <rule id="60202" level="5">
+    <if_sid>60139</if_sid>
+    <field name="win.system.eventID">^634$|^4730$</field>
+    <description>Security Enabled Global Group Deleted</description>
+    <options>no_full_log</options>
+    <group>group_deleted,win_group_deleted,pci_dss_8.1.2,pci_dss_10.2.5,gpg13_7.10,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.a.2.I,hipaa_164.312.a.2.II,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.4,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1531</id>
+    </mitre>
+  </rule>
+
+  <!-- Multiple events -->
+  <rule id="60203" level="10" frequency="$MS_FREQ" timeframe="240">
+    <if_matched_sid>60107</if_matched_sid>
+    <same_field>win.eventdata.targetUserName</same_field>
+    <description>Multiple failed attempts to perform a privileged operation by the same user</description>
+    <options>no_full_log</options>
+    <group>pci_dss_10.2.4,pci_dss_10.2.5,pci_dss_11.4,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.14,nist_800_53_AC.7,nist_800_53_SI.4,tsc_CC6.1,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1110</id>
+    </mitre>
+  </rule>
+
+  <rule id="60204" level="5" frequency="100" timeframe="300">
+    <if_matched_group>authentication_failed</if_matched_group>
+    <same_field>win.eventdata.ipAddress</same_field>
+    <description>Multiple Windows Logon Failures</description>
+    <options>no_full_log</options>
+    <group>authentication_failures,pci_dss_10.2.4,pci_dss_10.2.5,pci_dss_11.4,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.14,nist_800_53_AC.7,nist_800_53_SI.4,tsc_CC6.1,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+    <mitre>
+      <id>T1110</id>
+    </mitre>
+  </rule>
+
+  <rule id="60205" level="4" frequency="$MS_FREQ" timeframe="240">
+    <if_matched_sid>60104</if_matched_sid>
+    <same_field>win.eventdata.ipAddress</same_field>
+    <description>Multiple Windows audit failure events</description>
+    <options>no_full_log</options>
+    <group>pci_dss_10.6.1,gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_AU.6,tsc_CC7.2,tsc_CC7.3,</group>
+  </rule>
+
+  <rule id="60206" level="10" frequency="$MS_FREQ" timeframe="240">
+    <if_matched_sid>60102</if_matched_sid>
+    <description>Multiple Windows error Security events</description>
+    <options>no_full_log</options>
+  </rule>
+
+  <rule id="60207" level="10" frequency="$MS_FREQ" timeframe="120">
+    <if_matched_sid>60101</if_matched_sid>
+    <description>Multiple Windows warning Security events </description>
+    <options>no_full_log</options>
+  </rule>
+
+</group>
+
+ <!-- MS IPSec rules -->
+
+<group name="windows,windows_security,ipsec,">
+
+  <rule id="60208" level="8">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^4646$</field>
+    <description>IKE DoS-prevention mode started</description>
+    <options>no_full_log</options>
+  </rule>
+
+  <rule id="60209" level="8">
+    <if_sid>60104</if_sid>
+    <field name="win.system.eventID">^4652$|^4653$</field>
+    <description>An IPsec Main Mode negotiation failed</description>
+    <options>no_full_log</options>
+  </rule>
+
+  <rule id="60210" level="8">
+    <if_sid>60104</if_sid>
+    <field name="win.system.eventID">^4654$</field>
+    <description>An IPsec Quick Mode negotiation failed</description>
+    <options>no_full_log</options>
+  </rule>
+
+  <rule id="60211" level="8">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^4983$|^4984$</field>
+    <description>An IPsec Extended Mode negotiation failed</description>
+    <options>no_full_log</options>
+  </rule>
+
+  <rule id="60212" level="4">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^4960$</field>
+    <description>IPsec dropped an inbound packet that failed an integrity check</description>
+    <options>no_full_log</options>
+  </rule>
+
+  <rule id="60213" level="8">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^4961$|^4962$</field>
+    <description>IPsec dropped an inbound packet that failed a replay check</description>
+    <options>no_full_log</options>
+  </rule>
+
+  <rule id="60214" level="8">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^4963$</field>
+    <description>IPsec dropped an inbound clear text packet that should have been secured</description>
+    <options>no_full_log</options>
+  </rule>
+
+  <rule id="60215" level="4">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^4965$</field>
+    <description>IPsec received a packet from a remote computer with an incorrect Security Parameter Index (SPI)</description>
+    <options>no_full_log</options>
+  </rule>
+
+  <rule id="60216" level="7">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^4976$</field>
+    <description>During Main Mode negotiation, IPsec received an invalid negotiation packet</description>
+    <options>no_full_log</options>
+  </rule>
+
+  <rule id="60217" level="7">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^4977$</field>
+    <description>During Quick Mode negotiation, IPsec received an invalid negotiation packet</description>
+    <options>no_full_log</options>
+  </rule>
+
+  <rule id="60218" level="7">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^4978$</field>
+    <description>During Extended Mode negotiation, IPsec received an invalid negotiation packet</description>
+    <options>no_full_log</options>
+  </rule>
+
+  <rule id="60219" level="8">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^5453$</field>
+    <description>An IPsec negotiation with a remote computer failed because the IKE and AuthIP IPsec Keying Modules (IKEEXT) service is not started</description>
+    <options>no_full_log</options>
+    <mitre>
+      <id>T1489</id>
+    </mitre>
+  </rule>
+
+  <rule id="60220" level="8">
+    <if_sid>60104</if_sid>
+    <field name="win.system.eventID">^5480$</field>
+    <description>IPsec Services failed to get the complete list of network interfaces on the computer</description>
+    <options>no_full_log</options>
+  </rule>
+
+  <rule id="60221" level="8">
+    <if_sid>60104</if_sid>
+    <field name="win.system.eventID">^5483$</field>
+    <description>IPsec Services failed to initialize RPC server. IPsec Services could not be started</description>
+    <options>no_full_log</options>
+    <mitre>
+      <id>T1489</id>
+    </mitre>
+  </rule>
+
+  <rule id="60222" level="8">
+    <if_sid>60104</if_sid>
+    <field name="win.system.eventID">^5484$</field>
+    <description>IPsec Services has experienced a critical failure and has been shut down</description>
+    <options>no_full_log</options>
+    <mitre>
+      <id>T1529</id>
+    </mitre>
+  </rule>
+
+  <rule id="60223" level="8">
+    <if_sid>60104</if_sid>
+    <field name="win.system.eventID">^5485$</field>
+    <description>IPsec Services failed to process some IPsec filters on a plug-and-play event for network interfaces</description>
+    <options>no_full_log</options>
+  </rule>
+
+  <rule id="60224" level="8">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^4710$</field>
+    <description>IPsec Services was disabled</description>
+    <options>no_full_log</options>
+    <mitre>
+      <id>T1489</id>
+    </mitre>
+  </rule>
+
+  <rule id="60225" level="8">
+    <if_sid>60104</if_sid>
+    <field name="win.system.eventID">^4712$</field>
+    <description>IPsec Services encountered a potentially serious failure</description>
+    <options>no_full_log</options>
+    <mitre>
+      <id>T1489</id>
+    </mitre>
+  </rule>
+
+  <rule id="60227" level="8">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^6416$</field>
+    <description>A new external device was recognized by the system</description>
+    <options>no_full_log</options>
+    <mitre>
+      <id>T1092</id>
+    </mitre>
+  </rule>
+
+  <rule id="60228" level="4">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^4698$</field>
+    <description>A scheduled task was created</description>
+    <options>no_full_log</options>
+    <mitre>
+      <id>T1053</id>
+    </mitre>
+  </rule>
+
+  <rule id="60229" level="4">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^5136$</field>
+    <description>A directory service object was modified</description>
+    <options>no_full_log</options>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60230" level="4">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^5137$</field>
+    <description>A directory service object was created</description>
+    <options>no_full_log</options>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+  <rule id="60231" level="4">
+    <if_sid>60103</if_sid>
+    <field name="win.system.eventID">^5141$</field>
+    <description>A directory service object was deleted</description>
+    <options>no_full_log</options>
+    <mitre>
+      <id>T1484</id>
+    </mitre>
+  </rule>
+
+<!-- ########## Customerules by NopalCyber 5th Feb 2026 ##########  -->
+ 
+<!-- Abnormal number of account lockout events detection -->  
+<rule id="100201" level="3" frequency="5" timeframe="120"> <!-- Original level="10" -->
+<if_matched_sid>60115</if_matched_sid> <!-- Parent rule for User account locked out -->
+<description>Abnormal number of account lockout events detected.</description>
+<mitre>
+<id>T1110</id> <!-- Brute Force -->
+</mitre>
+<group>pci_dss_10.2.4,pci_dss_10.2.5,gpg13_4.13,gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_AC.7,tsc_CC6.1,tsc_CC7.2,</group>
+</rule>
+    
+    <!--  Issue with rule ID 100202 - Neec to check and fix -->
+  
+    <!-- Abnormal number of user account creation events detection (3 Accounts created within 8 hours) rule id = 100202-->
+
+<!-- Abnormal frequency of Netlogon access errors detection -->
+<rule id="100203" level="3" frequency="5" timeframe="300"> <!-- Original level="7" -->
+<if_matched_sid>60103</if_matched_sid> <!-- Parent rule for Windows Security events -->
+<field name="win.system.eventID">^5805$</field>
+<description>Abnormal frequency of Netlogon access errors detected.</description>
+<mitre>
+<id>T1550.002</id> <!-- Pass-the-Hash -->
+</mitre>
+<group>pci_dss_10.2.4,pci_dss_10.2.5,gpg13_4.13,gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_AU.6,tsc_CC7.2,</group>
+</rule>
+
+<!-- Abnormal number of files exfiltrated via USB (potential USB exfiltration) -->
+<rule id="100204" level="3" frequency="10" timeframe="60"> <!-- Original level="12" -->
+<if_matched_sid>60103</if_matched_sid> <!-- Parent rule for Windows Security events -->
+<field name="win.system.eventID">^4663$</field>
+<field name="win.eventdata.DeviceType">Removable Storage</field>
+<description>Abnormal number of file operations (potential USB exfiltration) detected.</description>
+<mitre>
+<id>T1052.001</id> <!-- Exfiltration Over Physical Medium: Exfiltration to USB -->
+</mitre>
+<group>pci_dss_10.2.4,pci_dss_10.2.5,gpg13_4.13,gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_CM.6,tsc_CC6.1,tsc_CC7.2,</group>
+</rule>    
+
+<!-- Abnormal number of remote logons detection -->
+<rule id="100205" level="3" frequency="5" timeframe="180"> <!-- Original level="10" -->
+<if_matched_sid>60103</if_matched_sid> <!-- Parent rule for Windows Security events -->
+<field name="win.system.eventID">^4624$|^528$|^540$</field>
+<!-- For Event ID 4624, specifically target RemoteInteractive logon type (10) -->
+<field name="win.eventdata.LogonType">^10$</field>
+<description>Abnormal number of remote logons detected (possible RDP brute-forcing or lateral movement).</description>
+<mitre>
+<id>T1078</id> <!-- Valid Accounts -->
+<id>T1021.001</id> <!-- Remote Services: Remote Desktop Protocol -->
+</mitre>
+<group>pci_dss_10.2.4,pci_dss_10.2.5,gpg13_4.13,gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_AC.7,tsc_CC6.1,tsc_CC7.2,</group>
+</rule>
+
+<!-- Windows Failed Logon due to bad username or password (Base rule for Password Spray attack) -->
+<rule id="100206" level="3"> <!-- Original level="5" -->
+<if_sid>60105</if_sid> <!-- Base rule for windows logon failure -->
+<field name="win.system.eventID">^4625$</field>
+<field name="win.eventdata.status">^0xc000006d$</field> <!-- Failure code for Bad username -->
+<field name="win.eventdata.targetUserName" negate="yes">.*\$</field> <!-- Exclude computer accounts -->
+<description>Windows Failed Logon due to bad username or password</description>
+<group>windows,authentication_failed</group>
+</rule>
+
+<!-- Multiple Failed Logins due to bad username or password -->
+<rule id="100220" level="12" frequency="10" timeframe="900" ignore="300">
+<if_matched_sid>100206</if_matched_sid>
+<same_field name="win.eventdata.targetUserName" /> <!-- Must be same user -->
+<description>Multiple Failed Logins due to bad username or password</description>
+<group>windows,authentication_failed,password_spray,threat_detection</group> 
+<mitre>
+<id>T1110.003</id> 
+<id>T1110</id>
+</mitre>
+</rule>
+
+<!-- Access -  Windows - Potential Password Spray Attack  - Rule -->
+<rule id="100207" level="3" frequency="6" timeframe="7200"> <!-- Original level="12" -->
+<if_matched_sid>100206</if_matched_sid>  <!-- Base rule for Windows Failed Logon due to bad username or password -->
+<!-- Must be same source IP (attacker's IP) -->
+<same_field name="win.eventdata.ipAddress" />
+<!-- Do NOT restrict same username (we want different usernames) -->
+<description>Potential Password Spraying Attack: Multiple failed logons with different usernames from same IP Address</description>
+<group>windows,authentication_failed,password_spray,threat_detection</group> 
+<mitre>
+<id>T1110.003</id> <!-- Password Spraying -->
+<id>T1110</id>     <!-- Brute Force -->
+</mitre>
+</rule>
+
+<!-- Access - Windows - Password change after several Failed Attempts -->
+<!-- Base Rule for Logon Failures -->
+<rule id="100208" level="4" frequency="10" timeframe="600">
+<if_matched_sid>60103</if_matched_sid>
+<field name="win.system.eventID">^4625$</field>
+<!-- Winodws security event sub-status code that indicates a "logon attempt failed because the user's password has expired" -->
+<field name="win.eventdata.SubStatus">^!0xc0000071</field>
+<same_user /> 
+<description>User $(win.eventdata.TargetUserName) experienced 10+ failed logons in 10 minutes.</description>
+<group>authentication_failed,multiple_failures,</group>
+</rule>
+
+<!-- Threat - Windows Password Reset - Rule -->
+<rule id="100209" level="3">
+<if_sid>60103</if_sid>
+<field name="win.system.eventID">^4723$</field>
+<description>User password was changed or reset(Self Password).</description>
+<group>user_management,password_change_success,</group>
+</rule>
+
+<!-- Access - Windows - Password change after several Failed Attempts - Rule -->
+<rule id="100210" level="3" frequency="2" timeframe="14400"> <!-- Original level="12" -->
+<!-- First condition: multiple failed logons (4625, count > 10, SubStatus != 0xC0000071) -->
+<if_matched_sid>100208</if_matched_sid>
+<!-- Second condition: password reset/change (4723 / 4724) -->
+<if_matched_sid>100209</if_matched_sid>
+<!-- Must be same user -->
+<same_field name="win.eventdata.targetUserName" />
+<!-- Exclude machine accounts -->
+<field name="win.eventdata.targetUserName" negate="yes">.*\$</field>
+<description>Potential Account Compromise — Password changed/reset after multiple failed logon attempts within 4 hours.</description>
+<group>windows,correlation,compromise,password_change,threat_detection</group>
+<mitre>
+<id>T1110</id>  <!-- Brute Force -->
+<id>T1098</id>  <!-- Account Manipulation -->
+</mitre>
+</rule>
+
+<!-- Threat - Windows - Short Lived Windows Accounts - Rule -->
+<rule id="100211" level="3" frequency="2" timeframe="14400"> <!-- Original level="12" -->
+<if_matched_sid>60109</if_matched_sid>   <!-- User account created (4720 / 624) -->
+<if_matched_sid>60111</if_matched_sid>   <!-- User account deleted (4726 / 630) -->
+<same_field name="win.eventdata.targetUserName" /> <!-- Must be the same user -->
+<field name="win.eventdata.targetUserName" negate="yes">.*\$</field> <!-- Exclude machine accounts -->
+<description>CRITICAL: Short-Lived Windows Account Detected — Account $(win.eventdata.targetUserName) created and deleted within 4 hours.</description>
+<group>windows,account_activity,short_lived_account,defense_evasion,persistence,threat_detection,pci_dss_10.2.4,nist_800_53_CM.6,tsc_CC6.1</group>
+<mitre>
+<id>T1136.001</id> <!-- Create Account: Local Account -->
+<id>T1098</id>     <!-- Account Manipulation -->
+</mitre>
+</rule>
+
+<!-- Threat - Access - Windows - Login Attempt From Disabled Account - Rule -->
+<rule id="100212" level="3">  <!-- Original level="9" -->
+<if_sid>60105</if_sid> 
+<field name="win.eventdata.subStatus">0xc0000072</field> <!-- Failure code inidccating the disabled account -->
+<field name="win.eventdata.targetUserName" type="pcre2" negate="yes">.+\$</field>  <!--  To exclude machine/computer accounts that ends with $ -->
+<field name="win.eventdata.targetUserName" type="pcre2" negate="yes">^-+$</field> <!-- Exclude blank usernames ("-") -->
+<field name="win.eventdata.targetUserName" type="pcre2" negate="yes">RCHBGD179\$</field> <!--  Excluding based on PE-298 --> 
+<description>Windows Login Attempt from Disabled Account.</description>
+<mitre>
+<id>T1078</id>     <!-- Valid Accounts -->
+<id>T1110</id>     <!-- Brute Force -->
+</mitre>
+<group>windows,windows_security,authentication_failed,disabled_account,threat_detection</group>
+</rule>
+
+<!-- Threat - Access - Windows - Multiple Kerberos Authentication Failed - Rule --> 
+<rule id="100213" level="3" frequency="50" timeframe="3600"> <!-- Original level="10" -->
+<if_matched_sid>60232</if_matched_sid> <!-- Rule for  Kerberos Authentication Failed - single event -->
+<description>Multiple Kerberos Authentication Failures Detected (Kerberoasting/Brute-Force).</description>
+<mitre>
+<id>T1110</id> 
+<id>T1558.003</id> 
+</mitre>
+<group>kerberos_attack,credential_access,brute_force,pci_dss_10.2.4,nist_800_53_AC.7,tsc_CC6.1,</group>
+</rule>
+
+<!-- Threat - Windows - Kerberoasting attack - Rule -->
+<rule id="100214" level="3"> <!-- Original level="12" -->
+<if_sid>60103</if_sid> <!-- Windows Audit Success Event -->
+<field name="win.system.eventID">^4769$</field> <!-- Kerberos Service Ticket Request -->
+<field name="win.eventdata.ticketOptions">^0x40810000$</field> <!-- Ticket Options used in Kerberoasting -->
+<field name="win.eventdata.ticketEncryptionType">^0x17$</field> <!-- AES-256 Encryption -->
+<field name="win.eventdata.serviceName" negate="yes">.*\$</field> <!-- Exclude computer service accounts -->
+<description>CRITICAL: Kerberoasting Attack Attempt Detected.</description>
+<mitre>
+<id>T1558.003</id> <!-- Kerberoasting -->
+<id>T1558</id>     <!-- Steal or Forge Kerberos Tickets -->
+<id>T1003</id>     <!-- Credential Dumping -->
+</mitre>
+<group>windows,kerberos,kerberoasting,credential_access,threat_detection,pci_dss_10.6.1,nist_800_53_AU.14,tsc_CC7.2</group>
+</rule>
+
+<!-- Threat - Windows Audit Log Stopped - Rule -->
+<rule id="100215" level="3"> <!-- Original level="12" -->
+<if_sid>60102</if_sid> <!-- Windows ERROR events -->
+<field name="win.system.eventID">^1100$</field> <!-- Event ID for Windows Audit Log Service Stopped -->
+<description>CRITICAL: Windows Audit Log Service Stopped - Potential Log Tampering Attempt.</description>
+<mitre>
+<id>T1562.002</id> 
+</mitre>
+<group>windows,windows_security,system_events,log_tampering,threat_detection,pci_dss_10.5,gdpr_IV_35.7.d,nist_800_53_AU.5,tsc_CC7.2</group>
+</rule>
+
+<!-- Threat - Windows - Domain Policy Changed - Rule -->
+<rule id="100216" level="3"> <!-- Original level="12" -->
+<if_sid>60103</if_sid>   <!-- Windows Audit Success parent -->
+<field name="win.system.eventID">^4739$</field> <!-- Domain policy modification -->
+<field name="win.eventdata.targetUserName" negate="yes">.*\$</field> <!-- Exclude machine accounts ending with $ -->
+<field name="win.eventdata.targetUserName" negate="yes" type="pcre2">^(SYSTEM|LOCAL SERVICE|NETWORK SERVICE)$</field> <!-- Exclude system/service accounts -->
+<description>CRITICAL: Domain Policy Changed — Modification to default domain or domain controllers policy detected.</description>
+<group>policy_change,domain_change,critical_change,pci_dss_10.2.4,nist_800_53_CM.6,tsc_CC6.1</group>
+<mitre>
+<id>T1484.001</id> <!-- Domain Policy Modification -->
+<id>T1562.001</id> <!-- Defense Evasion: Modify Security Controls -->
+</mitre>
+</rule>
+ 
+<!-- Windows - User Account Locked & Unlocked in Short Span -->
+<rule id="100217" level="3" frequency="2" timeframe="7200"> <!-- Original level="10" -->
+<if_matched_sid>60115</if_matched_sid> <!-- First Event: User account locked -->
+<if_matched_sid>60133</if_matched_sid> <!-- Second Event: User account unlocked -->
+<same_field name="win.eventdata.targetUserName" />     <!-- Must be same user -->
+<field name="win.eventdata.targetUserName" negate="yes">.*\$</field> <!-- To exclude machine/system accounts -->
+<description>User $(win.eventdata.targetUserName) was locked and unlocked in a short span — potential brute force or suspicious behavior.</description>
+<mitre>
+<id>T1078</id>   <!-- Valid Accounts -->
+<id>T1098</id>   <!-- Account Manipulation -->
+</mitre>
+<group>windows,account_activity,correlation,threat_detection</group>
+</rule>
+
+<!-- Threat - Windows Kerberos Policy Modifications - Rule -->
+<rule id="100218" level="3"> <!-- Original level="10" -->
+<if_sid>60103</if_sid>  <!-- Windows Audit Success Events -->
+<field name="win.system.eventID">^4713$|^4714$|^4715$|^4716$</field> <!-- Kerberos and trust policy change events -->
+<field name="win.eventdata.subjectUserName" negate="yes">.*\$</field> <!-- Exclude machine accounts -->
+<field name="win.eventdata.subjectUserName" negate="yes">^SYSTEM$|^LOCAL SERVICE$|^NETWORK SERVICE$</field> <!-- Exclude service/system accounts -->
+<description>CRITICAL: Windows Kerberos Policy Modification Detected</description>
+<group>policy_change,domain_change,critical_change,pci_dss_10.2.4,nist_800_53_CM.6,tsc_CC6.1</group>
+<mitre>
+<id>T1484.001</id> <!-- Domain Policy Modification -->
+<id>T1556.007</id> <!-- Kerberos Policy Modifications -->
+<id>T1562.001</id> <!-- Defense Evasion: Disable/Modify Security Tools -->
+</mitre>
+</rule>
+
+<!-- Login success after multiple login failures -->
+<rule id="100219" level="3" frequency="5" timeframe="300"> <!-- Original level="10" -->
+<if_matched_sid>60122</if_matched_sid>  <!-- Multiple windows login failures -->
+<field name="win.system.eventID">^4624$</field> <!-- Login succes event -->
+<same_field>win.eventdata.targetUserName</same_field>
+<description>UEBA: Login success after multiple login failures detected.</description>
+<group>policy_change,domain_change,critical_change,pci_dss_10.2.4,nist_800_53_CM.6,tsc_CC6.1</group>
+<mitre>
+<id>T1484.001</id> <!-- Domain Policy Modification -->
+<id>T1556.007</id> <!-- Kerberos Policy Modifications -->
+<id>T1562.001</id> <!-- Defense Evasion: Disable/Modify Security Tools -->
+</mitre>
+</rule>
+
+<!-- Noise Reduction: Internal IPsec failure due to missing policy -->
+<rule id="100220" level="3">
+<if_sid>60209</if_sid>
+<field name="win.eventdata.failureReason">No policy configured</field>	<!-- Configuration-related failure -->
+<field name="win.eventdata.localAddress" type="pcre2">^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)</field>	<!-- Internal local IP -->
+<field name="win.eventdata.remoteAddress" type="pcre2">^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)</field>	<!-- Internal remote IP -->
+<description>Windows: Internal IPsec negotiation failed due to missing policy.</description>
+</rule>
+
+<!-- Persistent internal IPsec policy misconfiguration -->
+<rule id="100221" level="3" frequency="50" timeframe="3600"> <!-- Original level="5" -->
+  <if_matched_sid>100220</if_matched_sid>
+  <same_field>win.eventdata.localAddress</same_field>
+  <same_field>win.eventdata.remoteAddress</same_field>
+  <description>Windows: Persistent internal IPsec negotiation failures due to missing policy from $(agent.name)</description>
+  <group>windows,windows_security,ipsec,configuration_issue</group>
+</rule>
+
+<rule id="100222" level="3"> <!-- Original level="5" -->
+<if_sid>60103</if_sid>
+<field name="win.system.eventID">^4724$</field>
+<field name="win.eventdata.subjectUserName" type="pcre2" negate="yes">^(prashanth_017377|Sarat_014163|rajashekar.e|itvja|mohan_016104|itinfra.anc)$</field> <!-- To reduce noise alerts these accounts added - Need to double check these accounts with Rainbow IT Team -->
+<field name="win.eventdata.targetUserName" negate="yes">.*\$</field> 
+<description>Windows: Password reset performed by non-approved user account.</description>
+<group>user_management,password_change_success,</group>
+</rule>
+
+<!-- Multiple security-enabled group membership additions by same administrator -->
+<rule id="100223" level="10" frequency="5" timeframe="300" ignore="1800">
+    <if_matched_sid>60141</if_matched_sid>
+    <same_field>win.eventdata.subjectUserName</same_field>
+    <description>Multiple security-enabled group membership additions performed by $(win.eventdata.subjectUserName)</description>
+    <group>group_changed,win_group_changed,privilege_management,</group>
+    <mitre>
+        <id>T1098</id>
+        <id>T1484</id>
+    </mitre>
+</rule>
+
+<!-- Multiple Windows DC logon failures from same source IP -->
+<rule id="100224" level="3" frequency="5" timeframe="300" ignore="300">
+    <if_matched_sid>60131</if_matched_sid>
+    <same_field>win.eventdata.ipAddress</same_field>
+    <description>Windows DC: Multiple logon failures from same source IP within 5 minutes.</description>
+    <group>windows,windows_security,authentication_failed,correlation,pci_dss_10.2.4,pci_dss_10.2.5,gpg13_7.1,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.1,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+</rule>
+
+<!-- Multiple Windows DC logon failures on same domain controller -->
+<rule id="100225" level="3" frequency="5" timeframe="300" ignore="300">
+    <if_matched_sid>60131</if_matched_sid>
+    <same_field>win.system.computer</same_field>
+    <description>Windows DC: Multiple logon failures on same domain controller within 5 minutes.</description>
+    <group>windows,windows_security,authentication_failed,correlation,pci_dss_10.2.4,pci_dss_10.2.5,gpg13_7.1,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.1,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+</rule>
+
+</group>

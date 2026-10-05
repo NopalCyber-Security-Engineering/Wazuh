@@ -1,0 +1,53 @@
+<group name="yeti,">
+    <rule id="100500" level="0">
+        <decoded_as>json</decoded_as>
+        <field name="integration">yeti</field>
+        <description>yeti integration messages.</description>
+        <options>no_full_log</options>
+    </rule>
+
+    <rule id="100501" level="5">
+        <if_sid>100500</if_sid>
+        <field name="yeti.info.source">AbuseCHMalwareBazaaar</field>
+        <description>Yeti Alert - $(yeti.info.source) detected this file: $(yeti.source.file)</description>
+        <group>pci_dss_10.6.1,pci_dss_11.4,gdpr_IV_35.7.d,</group>
+        <options>no_full_log</options>
+        <mitre>
+            <id>T1203</id>
+        </mitre>
+    </rule>
+
+    <rule id="100502" level="5">
+        <if_sid>100500</if_sid>
+        <field name="yeti.info.source">AlienVaultIPReputation</field>
+        <match>Inbound</match>
+        <description>Yeti Alert - $(yeti.info.source) detected Inbound connection from External IP address: $(yeti.source.src_ip)</description>
+        <group>pci_dss_10.2.4,pci_dss_10.2.5,</group>
+        <options>no_full_log</options>
+    </rule>
+
+    <rule id="100503" level="5">
+        <if_sid>100500</if_sid>
+        <field name="yeti.info.source">AlienVaultIPReputation</field>
+        <match>Outbound</match>
+        <description>Yeti Alert - $(yeti.info.source) detected Outbound connection to External IP address: $(yeti.source.destination_ip)</description>
+        <group>pci_dss_10.2.4,pci_dss_10.2.5,</group>
+        <options>no_full_log</options>
+    </rule>
+
+    <rule id="100504" level="5">
+        <if_sid>100500</if_sid>
+        <field name="yeti.info.source">AbuseIPDB</field>
+        <description>Yeti Alert - $(yeti.info.source) has detected a suspicious activity from IP with bad reputation</description>
+        <options>no_full_log</options>
+    </rule>
+
+    <rule id="100505" level="5">
+        <if_sid>100500</if_sid>
+        <field name="yeti.info.source" type="pcre2">\w</field>
+        <description>Yeti Alert - $(yeti.info.source) has detected a potential malicious activity</description>
+        <options>no_full_log</options>
+    </rule>
+
+</group>
+

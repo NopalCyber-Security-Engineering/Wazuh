@@ -1,0 +1,1034 @@
+<!--
+  Copyright (C) 2015, Wazuh Inc.
+-->
+
+<!--
+  Rules for:
+    FortiGate ID: 81600 - 80799
+-->
+
+<group name="fortigate,syslog,">
+
+  <rule id="81600" level="0">
+    <decoded_as>fortigate-firewall-v3</decoded_as>
+    <description>Fortigate v3 messages grouped.</description>
+  </rule>
+
+  <rule id="81601" level="0">
+    <decoded_as>fortigate-firewall-v4</decoded_as>
+    <description>Fortigate v4 messages grouped.</description>
+  </rule>
+
+  <rule id="81602" level="0">
+    <decoded_as>fortigate-firewall-v5</decoded_as>
+    <description>Fortigate v5 messages grouped.</description>
+  </rule>
+
+  <rule id="81641" level="0">
+    <decoded_as>fortigate-firewall-v6</decoded_as>
+    <description>Fortigate v6 messages grouped.</description>
+  </rule>
+
+  <rule id="81603" level="0">
+    <if_sid>81600,81601,81602,81641</if_sid>
+    <description>Fortigate messages grouped.</description>
+  </rule>
+
+  <rule id="81604" level="4">
+    <if_sid>81603</if_sid>
+    <status>dpd_failure</status>
+    <description>Fortigate: IPsec DPD failed.</description>
+    <group>firewall_drop,gdpr_IV_35.7.d,hipaa_164.312.a.1,nist_800_53_SC.7,pci_dss_1.4,</group>
+  </rule>
+
+  <rule id="81605" level="7" frequency="18" timeframe="45" ignore="240">
+    <if_matched_sid>81604</if_matched_sid>
+    <same_source_ip />
+    <description>Fortigate: Multiple firewall drop events from same source.</description>
+    <group>gdpr_IV_35.7.d,hipaa_164.312.a.1,hipaa_164.312.b,multiple_drops,nist_800_53_AU.6,nist_800_53_SC.7,pci_dss_1.4,pci_dss_10.6.1,</group>
+  </rule>
+
+  <rule id="81606" level="4">
+    <if_sid>81603</if_sid>
+    <action>login</action>
+    <status>failed</status>
+    <description>Fortigate: Login failed.</description>
+    <group>authentication_failed,gdpr_IV_32.2,gdpr_IV_35.7.d,gpg13_7.1,hipaa_164.312.b,invalid_login,nist_800_53_AC.7,nist_800_53_AU.14,pci_dss_10.2.4,pci_dss_10.2.5,</group>
+  </rule>
+
+  <rule id="81607" level="7" frequency="18" timeframe="45" ignore="240">
+    <if_matched_sid>81606</if_matched_sid>
+    <same_source_ip />
+    <description>Fortigate: Multiple failed login events from same source.</description>
+    <mitre>
+      <id>T1110</id>
+    </mitre>
+    <group>authentication_failures,gdpr_IV_35.7.d,gdpr_IV_32.2,gpg13_7.1,hipaa_164.312.b,nist_800_53_AU.6,nist_800_53_AU.14,nist_800_53_AC.7,pci_dss_10.6.1,pci_dss_10.2.4,pci_dss_10.2.5,</group>
+  </rule>
+
+  <rule id="81608" level="7">
+    <if_sid>81603</if_sid>
+    <match>Configuration is changed in the admin session</match>
+    <description>Fortigate: Configuration changed.</description>
+    <group>gdpr_IV_32.2,gdpr_IV_35.7.d,</group>
+  </rule>
+
+  <rule id="81609" level="8" frequency="18" timeframe="45" ignore="240">
+    <if_matched_sid>81608</if_matched_sid>
+    <same_source_ip />
+    <description>Fortigate: Multiple changed configuration events from same source.</description>
+    <mitre>
+      <id>T1562.001</id>
+    </mitre>
+    <group>gdpr_IV_35.7.d,</group>
+  </rule>
+
+  <rule id="81610" level="4">
+    <if_sid>81603</if_sid>
+    <match>http_decoder: HTTP.Unknown.Tunnelling</match>
+    <description>Fortigate: Default tunneling setting. Could be IPS.</description>
+    <group>gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_AU.6,pci_dss_10.6.1,</group>
+  </rule>
+
+  <rule id="81611" level="7" frequency="18" timeframe="45" ignore="240">
+    <if_matched_sid>81610</if_matched_sid>
+    <same_source_ip />
+    <description>Fortigate: Multiple default tunneling setting events from same source.</description>
+    <mitre>
+      <id>T1562.004</id>
+    </mitre>
+    <group>gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_AU.6,pci_dss_10.6.1,</group>
+  </rule>
+
+  <rule id="81612" level="3">
+    <if_sid>81603</if_sid>
+    <action>Edit</action>
+    <description>Fortigate: Firewall configuration changes.</description>
+    <group>gdpr_IV_35.7.d,gpg13_4.13,hipaa_164.312.b,nist_800_53_AU.6,pci_dss_10.6.1,</group>
+  </rule>
+
+  <rule id="81613" level="4" frequency="18" timeframe="45" ignore="240">
+    <if_matched_sid>81612</if_matched_sid>
+    <same_source_ip />
+    <description>Fortigate: Multiple Firewall edit events from same source.</description>
+    <group>gdpr_IV_35.7.d,gpg13_4.13,hipaa_164.312.b,nist_800_53_AU.6,pci_dss_10.6.1,</group>
+  </rule>
+
+  <rule id="81614" level="4">
+    <if_sid>81603</if_sid>
+    <match>ssl-login-fail</match>
+    <description>Fortigate: SSL VPN user failed login attempt.</description>
+    <group>authentication_failed,gdpr_IV_32.2,gdpr_IV_35.7.d,gpg13_7.1,hipaa_164.312.b,invalid_login,nist_800_53_AC.7,nist_800_53_AU.14,pci_dss_10.2.4,pci_dss_10.2.5,tsc_CC6.1,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+  </rule>
+
+  <rule id="81615" level="7" frequency="18" timeframe="45" ignore="240">
+    <if_matched_sid>81614</if_matched_sid>
+    <same_source_ip />
+    <description>Fortigate: Multiple firewall SSL VPN failed login events from same source.</description>
+    <mitre>
+      <id>T1110</id>
+      <id>T1133</id>
+    </mitre>
+    <group>authentication_failures,gdpr_IV_32.2,gdpr_IV_35.7.d,gpg13_7.1,hipaa_164.312.b,nist_800_53_AC.7,nist_800_53_AU.14,nist_800_53_AU.6,pci_dss_10.2.4,pci_dss_10.2.5,pci_dss_10.6.1,tsc_CC6.1,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+  </rule>
+
+  <rule id="81616" level="4">
+    <if_sid>81603</if_sid>
+    <action>logout</action>
+    <status>success</status>
+    <description>Fortigate: User logout successful.</description>
+    <group>gdpr_IV_32.2,gpg13_7.1,gpg13_7.2,hipaa_164.312.b,nist_800_53_AC.7,nist_800_53_AU.14,pci_dss_10.2.5,</group>
+  </rule>
+
+  <rule id="81617" level="7" frequency="18" timeframe="45" ignore="240">
+    <if_matched_sid>81616</if_matched_sid>
+    <same_source_ip />
+    <description>Fortigate: Multiple firewall logout events from same source.</description>
+    <group>gdpr_IV_32.2,gpg13_7.1,hipaa_164.312.b,nist_800_53_AC.7,nist_800_53_AU.14,pci_dss_10.2.5,</group>
+  </rule>
+
+  <rule id="81618" level="1">
+    <if_sid>81603</if_sid>
+    <match>type=traffic|type="traffic"</match>
+    <description>Fortigate: Traffic to be aware of.</description>
+    <group>gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_AU.6,pci_dss_10.6.1,</group>
+  </rule>
+
+  <rule id="81619" level="3" frequency="18" timeframe="45" ignore="240">
+    <if_matched_sid>81618</if_matched_sid>
+    <same_source_ip />
+    <description>Fortigate: Multiple high traffic events from same source.</description>
+    <group>gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_AU.6,pci_dss_10.6.1,</group>
+  </rule>
+
+  <rule id="81620" level="0" noalert="1"> <!-- Noise alert reduction -->
+    <if_sid>81603</if_sid>
+    <match>level=warning|level="warning"</match>
+    <action>blocked</action>
+    <field name="msg" type="pcre2" negate="yes">^(SSL connection is blocked due to unable to retrieve server's certificate|URL belongs to a denied category in policy|SSL connection is blocked, certificate-status: expired )$</field> <!-- This line is added to reduce noise alerts -->
+    <description>Fortigate: URL Blocked by Firewall.</description>
+    <group>firewall_drop,gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_AU.6,pci_dss_10.6.1,</group>
+  </rule>
+
+  <rule id="81621" level="3" frequency="18" timeframe="45" ignore="240">
+    <if_matched_sid>81620</if_matched_sid>
+    <same_source_ip />
+    <description>Fortigate: Multiple URLs blocked from same source.</description>
+    <group>gdpr_IV_35.7.d,hipaa_164.312.b,multiple_drops,nist_800_53_AU.6,pci_dss_10.6.1,</group>
+  </rule>
+
+  <rule id="81622" level="3">
+    <if_sid>81603</if_sid>
+    <match>level=information|level="information"</match>
+    <action>tunnel-up</action>
+    <description>Fortigate: VPN user connected.</description>
+    <mitre>
+      <id>T1078</id>
+    </mitre>
+    <group>authentication_success,gdpr_IV_32.2,gpg13_7.1,hipaa_164.312.b,nist_800_53_AC.7,nist_800_53_AU.14,pci_dss_10.2.5,</group>
+  </rule>
+
+  <rule id="81623" level="4" frequency="18" timeframe="45" ignore="240">
+    <if_matched_sid>81622</if_matched_sid>
+    <same_source_ip />
+    <description>Fortigate: Multiple vpn user connected from same source.</description>
+    <mitre>
+      <id>T1078</id>
+    </mitre>
+    <group>authentication_success,gdpr_IV_32.2,gpg13_7.1,hipaa_164.312.b,nist_800_53_AC.7,nist_800_53_AU.14,pci_dss_10.2.5,</group>
+  </rule>
+
+  <rule id="81624" level="3">
+    <if_sid>81603</if_sid>
+    <match>level=information|level="information"</match>
+    <action>tunnel-down</action>
+    <description>Fortigate: VPN user disconnected.</description>
+    <group>gdpr_IV_32.2,gpg13_7.1,hipaa_164.312.b,nist_800_53_AC.7,nist_800_53_AU.14,pci_dss_10.2.5,</group>
+  </rule>
+
+  <rule id="81625" level="4" frequency="18" timeframe="45" ignore="240">
+    <if_matched_sid>81624</if_matched_sid>
+    <same_source_ip />
+    <description>Fortigate: Multiple user disconnected events from same source.</description>
+    <group>gdpr_IV_32.2,gpg13_7.1,hipaa_164.312.b,nist_800_53_AC.7,nist_800_53_AU.14,pci_dss_10.2.5,</group>
+  </rule>
+
+  <rule id="81626" level="3">
+    <if_sid>81603</if_sid>
+    <match>ui</match>
+    <status>success</status>
+    <action>login</action>
+    <description>Fortigate: User successfully logged into firewall interface.</description>
+    <group>gdpr_IV_32.2,gpg13_7.1,gpg13_7.2,hipaa_164.312.b,nist_800_53_AU.6,pci_dss_10.6.1,</group>
+  </rule>
+
+  <rule id="81627" level="4" frequency="18" timeframe="45" ignore="240">
+    <if_matched_sid>81626</if_matched_sid>
+    <same_source_ip />
+    <description>Fortigate: Multiple firewall login events from same source.</description>
+    <group>gdpr_IV_35.7.d,gpg13_7.1,gpg13_7.2,hipaa_164.312.b,nist_800_53_AU.6,pci_dss_10.6.1,</group>
+  </rule>
+
+  <rule id="81628" level="11">
+    <if_sid>81603</if_sid>
+    <match>attack</match>
+    <action>detected</action>
+    <description>Fortigate attack detected.</description>
+    <group>attack,gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_AU.6,pci_dss_10.6.1,</group>
+  </rule>
+
+  <rule id="81629" level="3">
+    <if_sid>81603</if_sid>
+    <match>attack</match>
+    <action>dropped</action>
+    <description>Fortigate attack dropped.</description>
+    <group>attack,gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_AU.6,pci_dss_10.6.1,</group>
+  </rule>
+
+  <rule id="81630" level="3">
+    <if_sid>81603</if_sid>
+    <match>attack</match>
+    <action>clear_session</action>
+    <description>Fortigate Attack: Session cleared.</description>
+    <group>attack,gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_AU.6,pci_dss_10.6.1,</group>
+  </rule>
+
+  <rule id="81631" level="3">
+    <if_sid>81603</if_sid>
+    <action>Add</action>
+    <description>Fortigate: Firewall configuration changes.</description>
+    <group>gpg13_4.13,hipaa_164.312.a.1,nist_800_53_SC.7,pci_dss_1.4,</group>
+  </rule>
+
+  <rule id="81632" level="4" frequency="16" timeframe="45" ignore="240">
+    <if_matched_sid>81631</if_matched_sid>
+    <same_source_ip />
+    <description>Fortigate: Multiple firewall edit events from same source.</description>
+    <group>gdpr_IV_35.7.d,gpg13_4.13,hipaa_164.312.a.1,hipaa_164.312.b,nist_800_53_AU.6,nist_800_53_SC.7,pci_dss_1.4,pci_dss_10.6.1,</group>
+  </rule>
+
+  <rule id="81633" level="3">
+    <if_sid>81603</if_sid>
+    <match>subtype="app-ctrl"|subtype=app-ctrl</match>
+    <action>pass</action>
+    <description>Fortigate: App passed by firewall.</description>
+    <group>gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_AU.6,pci_dss_10.6.1,</group>
+  </rule>
+
+  <rule id="81634" level="5">
+    <if_sid>81603</if_sid>
+    <match>subtype="app-ctrl"|subtype=app-ctrl</match>
+    <action>block</action>
+    <description>Fortigate: App blocked by firewall.</description>
+    <group>firewall_drop,gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_AU.6,pci_dss_10.6.1,</group>
+  </rule>
+
+  <rule id="81635" level="3" frequency="16" timeframe="45" ignore="240">
+    <if_matched_sid>81620</if_matched_sid>
+    <same_source_ip />
+    <description>Fortigate: Multiple URLs blocked from same source.</description>
+    <group>gdpr_IV_35.7.d,hipaa_164.312.b,multiple_drops,nist_800_53_AU.6,pci_dss_10.6.1,</group>
+  </rule>
+
+  <rule id="81636" level="1">
+    <if_sid>81603</if_sid>
+    <match>type="event" subtype="vpn" level="notice"|type=event subtype=vpn level=notice|type=event,subtype=vpn,level=notice</match>
+    <description>Fortigate: VPN related information.</description>
+  </rule>
+
+  <rule id="81637" level="1">
+    <if_sid>81603</if_sid>
+    <match>type="event" subtype="vpn" level="error"|type=event subtype=vpn level=error|type=event,subtype=vpn,level=error</match>
+    <description>Fortigate: VPN related error.</description>
+  </rule>
+
+  <rule id="81638" level="6">
+    <if_sid>81603</if_sid>
+    <match>subtype=virus|subtype="virus"</match>
+    <description>Fortigate: Virus detected.</description>
+    <group>gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_AU.6,pci_dss_10.6.1,</group>
+  </rule>
+
+  <rule id="81639" level="6">
+    <if_sid>81638</if_sid>
+    <action>blocked</action>
+    <description>Fortigate: Blocked URL because a virus was detected.</description>
+    <group>firewall_drop,gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_AU.6,pci_dss_10.6.1,</group>
+  </rule>
+
+  <!--
+  NOTE: Since this rule can be noisy is set to level 1 by default.
+  -->
+
+  <rule id="81640" level="1">
+    <if_sid>81603</if_sid>
+    <match>level=notice|level="notice"</match>
+    <action>passthrough</action>
+    <description>Fortigate: URL belongs to an allowed category.</description>
+  </rule>
+
+  <rule id="81642" level="3">
+    <if_sid>81603</if_sid>
+    <match>subtype="ha" level="critical"|subtype=ha level=critical</match>
+    <description>Fortigate: Virtual cluster detected member join.</description>
+  </rule>
+
+  <rule id="81643" level="7">
+    <if_sid>81603</if_sid>
+    <match>subtype="wad" level="error"|subtype=wad level=error</match>
+    <action>receive</action>
+    <description>Fortigate: SSL fatal alert.</description>
+  </rule>
+
+  <rule id="81644" level="6">
+    <if_sid>81603</if_sid>
+    <match>type="utm" subtype="webfilter"|type=utm subtype=webfilter</match>
+    <action>blocked</action>
+    <description>Fortigate: Blocked URL belongs to a denied category in policy.</description>
+  </rule>
+
+  <rule id="81645" level="5">
+    <if_sid>81603</if_sid>
+    <match>type="utm" subtype="ssl" eventtype="ssl-anomalies"|type=utm subtype=ssl eventtype=ssl-anomalies</match>
+    <action>blocked</action>
+    <description>Fortigate: SSL anomalies. Blocked connection.</description>
+  </rule>
+
+  <rule id="81646" level="5">
+    <if_sid>81603</if_sid>
+    <match>type="utm" subtype="cifs" eventtype="cifs-filefilter"|type=utm subtype=cifs eventtype=cifs-filefilter</match>
+    <action>blocked</action>
+    <description>Fortigate: File was blocked by file filter.</description>
+  </rule>
+
+  <!--
+  References:
+    For the creation of the parent rule we had in mind this article: https://kb.fortinet.com/kb/documentLink.do?externalID=FD44560
+    For the creation of the child rules we had in mind this article: https://help.fortinet.com/fa/faz50hlp/56/5-6-7/Content/FMG-FAZ/2200_Events/0200_Event_handlers/0400_Predefined_event_handlers.htm
+
+  Severity Correlation:
+    Critical: Level 10
+    High    : Level 7
+    Medium  : Level 5
+    Low     : Level 3
+
+  Groups Correlation:
+    Event Category
+    Log Type
+  -->
+
+  <rule id="44600" level="0">
+    <if_sid>44400</if_sid>
+    <field name="devid">^FG\S+|^FGT\S+</field>
+    <description>FortiGate rules.</description>
+  </rule>
+
+  <rule id="44601" level="10">
+    <if_sid>44600</if_sid>
+    <field name="appcat">^botnet$|^proxy$</field>
+    <description>FortiGate: Application control event.</description>
+  </rule>
+
+  <rule id="44602" level="10">
+    <if_sid>44601</if_sid>
+    <action type="pcre2">^pass$|^monitor$</action>
+    <description>FortiGate: Botnet application allowed by application control.</description>
+  </rule>
+
+  <rule id="44603" level="7">
+    <if_sid>44601</if_sid>
+    <action type="pcre2" negate="yes">^pass$|^monitor$</action>
+    <description>FortiGate: Botnet application blocked by application control.</description>
+  </rule>
+
+  <rule id="44604" level="5">
+    <if_sid>44600</if_sid>
+    <field name="logid">^1501054600$|^1501054601$</field>
+    <description>FortiGate: Botnet C-and-C blocked by DNS filtering.</description>
+  </rule>
+
+  <rule id="44605" level="7">
+    <if_sid>44600</if_sid>
+    <action type="pcre2">^blocked$</action>
+    <field name="logid">^0202009248$|^0202009249$</field>
+    <description>FortiGate: Botnet C-and-C blocked by IP-Reputation.</description>
+  </rule>
+
+  <rule id="44606" level="10">
+    <if_sid>44601</if_sid>
+    <action type="pcre2">^detected$|^pass session$</action>
+    <description>FortiGate: Botnet traffic allowed by IPS.</description>
+  </rule>
+
+  <rule id="44607" level="7">
+    <if_sid>44601</if_sid>
+    <action type="pcre2" negate="yes">^detected$|^pass session$</action>
+    <description>FortiGate: Botnet traffic blocked by IPS.</description>
+  </rule>
+
+  <rule id="44608" level="10">
+    <if_sid>44600</if_sid>
+    <action>conserve mode</action>
+    <description>FortiGate: System services entered conserve mode.</description>
+  </rule>
+
+  <rule id="44609" level="7">
+    <if_sid>44600</if_sid>
+    <field name="level">^warning$</field>
+    <field name="botnetip">\.+</field>
+    <description>DNS Botnet C-and-C - High severity.</description>
+  </rule>
+
+  <rule id="44610" level="7">
+    <if_sid>44600</if_sid>
+    <field name="level">^warning$</field>
+    <field name="botnedomain">\.+</field>
+    <description>DNS Botnet C-and-C - High severity.</description>
+  </rule>
+
+  <rule id="44611" level="5">
+    <if_sid>44600</if_sid>
+    <field name="logdesc">^Virtual cluster move member$|^Virtual cluster member state moved$</field>
+    <description>FortiGate: HA failover.</description>
+  </rule>
+
+  <rule id="44612" level="7">
+    <if_sid>44600</if_sid>
+    <action type="pcre2">^interface-stat-change$</action>
+    <field name="fstatus">^down$</field>
+    <description>FortiGate: Interface down.</description>
+  </rule>
+
+  <rule id="44613" level="5">
+    <if_sid>44600</if_sid>
+    <action type="pcre2">^interface-stat-change$</action>
+    <field name="fstatus">^up$</field>
+    <description>FortiGate: Interface up.</description>
+  </rule>
+
+  <rule id="44614" level="5">
+    <if_sid>44600</if_sid>
+    <action type="pcre2">^phase2-down$</action>
+    <description>FortiGate: IPsec phase2 down.</description>
+  </rule>
+
+  <rule id="44615" level="5">
+    <if_sid>44600</if_sid>
+    <action type="pcre2">^phase2-up$</action>
+    <description>FortiGate: IPsec phase2 up.</description>
+  </rule>
+
+  <rule id="44616" level="5">
+    <if_sid>44600</if_sid>
+    <field name="virus">\.+</field>
+    <description>FortiGate: Antivirus event.</description>
+  </rule>
+
+  <rule id="44617" level="7">
+    <if_sid>44600</if_sid>
+    <field name="logid">^0211008193$|^0211008195$</field>
+    <description>FortiGate: Malware traffic allowed by antiVirus.</description>
+  </rule>
+
+  <rule id="44618" level="5">
+    <if_sid>44600</if_sid>
+    <field name="logid">^0211008192$|^0211008194$</field>
+    <description>FortiGate: Malware traffic blocked by antiVirus.</description>
+  </rule>
+
+  <rule id="44619" level="5">
+    <if_sid>44600</if_sid>
+    <field name="logid">^0211009234$|^0211009236$</field>
+    <description>FortiGate: Malware traffic blocked by FortiSandbox signature update.</description>
+  </rule>
+
+  <rule id="44620" level="7">
+    <if_sid>44600</if_sid>
+    <field name="logid">^0211009235$|^0211009237$</field>
+    <description>FortiGate: Malware traffic allowed by FortiSandbox.</description>
+  </rule>
+
+  <rule id="44621" level="7">
+    <if_sid>44600</if_sid>
+    <action type="pcre2">^power-supply-monitor$</action>
+    <field name="fstatus">^failure$</field>
+    <description>FortiGate: Power supply failure.</description>
+  </rule>
+
+  <rule id="44622" level="0">
+    <if_sid>44600</if_sid>
+    <field name="type">^utm$</field>
+    <description>FortiGate: UTM logs.</description>
+  </rule>
+
+  <rule id="44623" level="7">
+    <if_sid>44622</if_sid>
+    <field name="virus">\.+</field>
+    <field name="dtype" negate="yes">^fortisandbox$</field>
+    <description>FortiGate: UTM antivirus event.</description>
+  </rule>
+
+  <rule id="44624" level="10">
+    <if_sid>44622</if_sid>
+    <field name="appcat">^botnet$|^proxy$</field>
+    <description>FortiGate: UTM app control event.</description>
+  </rule>
+
+  <rule id="44625" level="5">
+    <if_sid>44622</if_sid>
+    <action type="pcre2">^block$</action>
+    <description>FortiGate: UTM DLP event.</description>
+  </rule>
+
+  <rule id="44626" level="5">
+    <if_sid>44622</if_sid>
+    <field name="subtype">^webfilter$</field>
+    <description>FortiGate: UTM web filter event.</description>
+  </rule>
+
+  <rule id="44627" level="0">
+    <if_sid>44600</if_sid>
+    <field name="subtype">^ips$</field>
+    <description>FortiGate: IPS logs.</description>
+  </rule>
+
+  <rule id="44628" level="10">
+    <if_sid>44627</if_sid>
+    <field name="severity">^critical$</field>
+    <description>FortiGate: IPS - Critical severity.</description>
+  </rule>
+
+  <rule id="44629" level="7">
+    <if_sid>44627</if_sid>
+    <field name="severity">^high$</field>
+    <description>FortiGate: IPS - High severity.</description>
+  </rule>
+
+  <rule id="44630" level="3">
+    <if_sid>44627</if_sid>
+    <field name="severity">^low$</field>
+    <description>FortiGate: IPS - Low severity.</description>
+  </rule>
+
+  <rule id="44631" level="5">
+    <if_sid>44627</if_sid>
+    <field name="severity">^medium$</field>
+    <description>FortiGate: IPS - Medium severity.</description>
+  </rule>
+  
+    <!--################# Custom rules by NopalCyber - Apr 2026 #################-->
+  
+<!--============= Critical Security (Rules 102100-102XXX)   =============-->
+
+  <!-- Base rule for admin failure detection -->
+  <rule id="102100" level="3">
+   <if_sid>81606</if_sid>
+    <field name="logdesc">Admin login failed</field>
+    <description>FortiGate: Admin authentication failure detected</description>
+    <mitre>
+      <id>T1110</id>
+      <id>T1078</id>
+    </mitre>
+    <group>authentication_failed,fortigate,pci_dss_10.2.4,pci_dss_10.2.5,gpg13_7.8,gdpr_IV_35.7.d,gdpr_IV_32.2,hipaa_164.312.b,nist_800_53_AU.14,nist_800_53_AC.7,tsc_CC6.1,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+  </rule>
+
+  <!-- Brute force attack from single IP -->
+  <rule id="102101" level="3" frequency="5" timeframe="60">
+    <if_matched_sid>102100</if_matched_sid>
+    <same_srcip />
+    <description>FortiGate: Multiple admin login failures from same IP - Brute force attack.</description>
+    <mitre>
+      <id>T1110.001</id>
+      <id>T1110.003</id>
+    </mitre>
+    <group>authentication_failures,brute_force,fortigate,pci_dss_11.4,pci_dss_10.2.4,pci_dss_10.2.5,gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_SI.4,tsc_CC6.1,tsc_CC6.8,tsc_CC7.2,tsc_CC7.3,</group>
+  </rule>
+
+  <!-- Distributed brute force from multiple IPs -->
+  <rule id="102102" level="3" frequency="10" timeframe="180">
+    <if_matched_sid>102100</if_matched_sid>
+    <description>FortiGate: Multiple admin login failures from different IPs - Distributed admin brute force attack.</description>
+    <different_srcip />
+    <mitre>
+      <id>T1110.004</id>
+      <id>T1589.001</id>
+    </mitre>
+    <group>authentication_failures,distributed_brute_force,fortigate,pci_dss_11.4,gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_SI.4,tsc_CC6.1,tsc_CC7.2,</group>
+  </rule>
+
+
+  <!-- Username enumeration detection -->
+  <rule id="102103" level="3" frequency="3" timeframe="120">
+    <if_matched_sid>102100</if_matched_sid>
+    <same_srcip />
+    <user negate="yes">admin</user>
+    <description>FortiGate: Username enumeration attack - Login attempt with non-standard admin usernames.</description>
+    <mitre>
+      <id>T1589.001</id>
+      <id>T1087</id>
+    </mitre>
+    <group>reconnaissance,username_enumeration,fortigate,pci_dss_10.2.4,gdpr_IV_35.7.d,nist_800_53_SI.4,tsc_CC6.8,</group>
+  </rule>
+
+<!--============= CRITICAL SECURITY - EXTERNAL ADMIN ACCESS   =============-->
+ 
+  <!-- External admin access from foreign country -->
+  <rule id="102104" level="3">
+    <if_sid>102100</if_sid>
+    <field name="srccountry" negate="yes">^Reserved$</field>
+    <field name="ui" type="pcre2">(https|http|ssh)\(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\)</field>
+    <description>FortiGate: External admin access attempt from foreign country.</description>
+    <mitre>
+      <id>T1078</id>
+      <id>T1133</id>
+    </mitre>
+    <group>authentication_failed,external_access,fortigate,pci_dss_10.2.4,gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_AC.7,tsc_CC6.1,tsc_CC6.8,</group>
+  </rule> 
+ 
+ 
+<!--============= NETWORK ATTACKS - PORT SCANNING DETECTION    =============-->
+
+  <!-- Base rule for denied traffic to WAN interface -->
+  <rule id="102105" level="3">
+    <if_sid>81618</if_sid>
+    <action>^deny$</action>
+    <field name="dstzone" type="pcre2">^(wan|wan1)$</field>
+    <description>FortiGate: Denied connection to WAN interface</description>
+    <group>fortigate,denied_traffic,</group>
+  </rule> 
+
+  <!-- Port scanning from single IP -->
+  <rule id="102106" level="3" frequency="10" timeframe="60">
+    <if_matched_sid>102105</if_matched_sid>
+    <same_srcip />
+    <description>FortiGate: Port scanning detected - Single source probing multiple ports.</description>
+    <mitre>
+      <id>T1046</id>
+      <id>T1595.001</id>
+    </mitre>
+    <group>recon,portscan,fortigate,pci_dss_11.4,gdpr_IV_35.7.d,nist_800_53_SI.4,tsc_CC6.1,tsc_CC6.8,tsc_CC7.2,</group>
+  </rule>
+  
+  <!-- Distributed port scanning from multiple IPs -->
+  <rule id="102107" level="3" frequency="20" timeframe="120">
+    <if_matched_sid>102105</if_matched_sid>
+    <description>FortiGate: Distributed port scanning - Multiple external IPs probing firewall</description>
+    <mitre>
+      <id>T1046</id>
+      <id>T1595</id>
+    </mitre>
+    <group>recon,distributed_portscan,fortigate,pci_dss_11.4,gdpr_IV_35.7.d,nist_800_53_SI.4,tsc_CC6.1,tsc_CC7.2,</group>
+  </rule>
+ 
+  <!-- Unusual port probing from foreign countries -->
+  <rule id="102108" level="3">
+    <if_sid>102105</if_sid>
+    <dstport type="osregex">^\d{4,5}$</dstport>
+    <field name="srccountry" negate="yes">^Reserved$</field>
+    <description>FortiGate: Network reconnaissance - Foreign IP probing unusual high ports</description>
+    <mitre>
+      <id>T1595.002</id>
+      <id>T1590</id>
+    </mitre>
+    <group>recon,unusual_ports,fortigate,pci_dss_11.4,nist_800_53_SI.4,tsc_CC6.8,</group>
+  </rule>
+
+
+<!--=============   NETWORK ATTACKS - TRAFFIC ANOMALIES     =============-->
+
+
+  <!-- Persistent automated attack detection -->
+  <rule id="102109" level="3" frequency="50" timeframe="300">
+    <if_matched_sid>81618</if_matched_sid>
+    <same_srcip />
+    <action>^deny$</action>
+    <description>FortiGate: Persistent connection attempts from blocked source - Possible automated attack</description>
+    <mitre>
+      <id>T1498</id>
+    </mitre>
+    <group>fortigate,persistent_attack,pci_dss_11.4,nist_800_53_SI.4,tsc_CC6.8,</group>
+  </rule>
+
+
+<!--=============   DATA PROTECTION - DATA TRANSFER MONITORING    =============-->
+
+  <!-- Large outbound data transfer detection -->
+  <rule id="102110" level="3">
+    <if_sid>81618</if_sid>
+    <field name="subtype">^forward$</field>
+    <action>^accept$</action>
+    <field name="sentbyte">^\d{8,}$</field>
+    <description>FortiGate: Large outbound data transfer detected (>10MB)</description>
+    <mitre>
+      <id>T1048</id>
+    </mitre>
+    <group>fortigate,data_transfer,pci_dss_10.6.1,gdpr_IV_35.7.d,nist_800_53_AU.6,tsc_CC6.8,</group>
+  </rule>
+
+  <!-- Multiple large transfers indicating data exfiltration -->
+  <rule id="102111" level="3" frequency="3" timeframe="600">
+    <if_matched_sid>102110</if_matched_sid>
+    <same_srcip />
+    <description>FortiGate: Multiple large data transfers - Possible data exfiltration</description>
+    <mitre>
+      <id>T1048.003</id>
+      <id>T1567</id>
+    </mitre>
+    <group>fortigate,data_exfiltration,pci_dss_10.6.1,gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_AU.6,tsc_CC6.1,tsc_CC6.8,</group>
+  </rule>
+
+
+  <!-- External database access from foreign country -->
+  <rule id="102112" level="3">
+    <if_sid>81618</if_sid>
+    <field name="service">ms-sql-s|ms-sql-m|mysql|postgresql|oracle</field>
+    <action>^accept$</action>
+    <field name="srccountry" negate="yes">^Reserved$|^India$</field>
+    <description>FortiGate: External database access from foreign country - Potential data breach</description>
+    <mitre>
+      <id>T1530</id>
+      <id>T1213</id>
+    </mitre>
+    <group>fortigate,database_access,external_access,pci_dss_10.6.1,gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_AU.6,tsc_CC6.1,</group>
+  </rule>
+
+<!--=============   ADVANCED THREATS - VPN ATTACKS    =============-->
+
+  <!-- Base VPN phase 1 failure detection -->
+  <rule id="102113" level="3">
+    <field name="type">^event$</field>
+    <field name="subtype">^vpn$</field>
+    <field name="logid">^0101037124$|^0101037128$</field>
+    <field name="logdesc">IPsec phase 1 error</field>
+    <description>FortiGate: VPN phase 1 negotiation failure</description>
+    <mitre>
+      <id>T1133</id>
+    </mitre>
+    <group>fortigate,vpn,vpn_error,</group>
+  </rule>
+
+  <!-- VPN reconnaissance attack from single IP -->
+  <rule id="102114" level="3" frequency="5" timeframe="300">
+    <if_matched_sid>102113</if_matched_sid>
+    <same_srcip />
+    <description>FortiGate: VPN reconnaissance attack - Multiple phase 1 failures from same IP</description>
+    <mitre>
+      <id>T1133</id>
+      <id>T1595.002</id>
+    </mitre>
+    <group>fortigate,vpn,vpn_recon,pci_dss_11.4,nist_800_53_SI.4,tsc_CC6.8,</group>
+  </rule>
+
+  <!-- Foreign VPN connection attempt -->
+  <rule id="102115" level="3">
+    <if_sid>102113</if_sid>
+    <field name="srccountry" negate="yes">^Reserved$|^India$</field>
+    <description>FortiGate: Foreign VPN connection attempt - Unauthorized VPN access from unusual location</description>
+    <mitre>
+      <id>T1133</id>
+      <id>T1078.003</id>
+    </mitre>
+    <group>fortigate,vpn,external_vpn,pci_dss_10.2.4,gdpr_IV_35.7.d,nist_800_53_AC.17,tsc_CC6.1,tsc_CC6.8,</group>
+  </rule>
+
+  <!-- Distributed VPN attack from multiple IPs -->
+  <rule id="102116" level="3" frequency="8" timeframe="180">
+    <if_matched_sid>102113</if_matched_sid>
+    <description>FortiGate: Distributed VPN attack - Multiple IPs attempting VPN connections</description>
+    <mitre>
+      <id>T1133</id>
+      <id>T1110</id>
+    </mitre>
+    <group>fortigate,vpn,distributed_vpn_attack,pci_dss_11.4,gdpr_IV_35.7.d,nist_800_53_SI.4,tsc_CC6.1,tsc_CC7.2,</group>
+  </rule>
+
+
+<!--=============   ADVANCED THREATS - MULTI-VECTOR ATTACKS    =============-->
+
+  <!-- Multi-vector attack combining brute force and port scanning -->
+  <rule id="102117" level="3">
+    <if_sid>102101,102106</if_sid>
+    <description>FortiGate: Multi-vector attack detected - Simultaneous brute force and port scanning</description>
+    <mitre>
+      <id>T1595</id>
+      <id>T1110</id>
+    </mitre>
+    <group>fortigate,multi_vector_attack,pci_dss_11.4,gdpr_IV_35.7.d,nist_800_53_SI.4,tsc_CC6.1,tsc_CC7.2,</group>
+  </rule>
+
+  <!-- Valid username found with wrong password - credential attack -->
+  <rule id="102118" level="3" frequency="3" timeframe="300">
+    <if_matched_sid>102100</if_matched_sid>
+    <same_srcip />
+    <field name="reason">auth_fail|wrong password</field>
+    <user>^admin$</user>
+    <description>FortiGate: Valid username with wrong password - Attacker found valid admin account</description>
+    <mitre>
+      <id>T1110.001</id>
+      <id>T1589.001</id>
+    </mitre>
+    <group>fortigate,credential_attack,username_found,pci_dss_10.2.4,gdpr_IV_35.7.d,nist_800_53_AC.7,tsc_CC6.8,</group>
+  </rule>
+
+  <!-- Coordinated attack campaign from distributed sources -->
+  <rule id="102119" level="3" frequency="5" timeframe="600">
+    <if_matched_sid>102101</if_matched_sid>
+    <if_matched_sid>102102</if_matched_sid>
+    <if_matched_sid>102106</if_matched_sid>
+    <if_matched_sid>102114</if_matched_sid>
+    <description>FortiGate: Coordinated attack campaign - Multiple attack patterns from distributed sources</description>
+    <mitre>
+      <id>T1595</id>
+      <id>T1110</id>
+      <id>T1046</id>
+    </mitre>
+    <group>fortigate,coordinated_attack,apt,pci_dss_11.4,gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_SI.4,tsc_CC6.1,tsc_CC7.2,</group>
+  </rule>
+
+
+<!--=============   UTM AND APPLICATION CONTROL    =============-->
+
+  <!-- Critical UTM app-control signature detection -->
+  <rule id="102120" level="3">
+    <if_sid>44624</if_sid>
+    <field name="eventtype">^signature$</field>
+    <field name="level">^critical$|^high$</field>
+    <description>FortiGate: Critical UTM app-control signature detected</description>
+    <mitre>
+      <id>T1071</id>
+    </mitre>
+    <group>fortigate,utm,app_control,pci_dss_11.4,nist_800_53_SI.4,tsc_CC6.8,</group>
+  </rule>
+
+  <!-- Persistent botnet traffic attempts -->
+  <rule id="102121" level="3" frequency="10" timeframe="300">
+    <if_matched_sid>44607</if_matched_sid>
+    <same_srcip />
+    <description>FortiGate: Persistent botnet traffic attempts - Multiple blocked connections</description>
+    <mitre>
+      <id>T1071.001</id>
+      <id>T1568</id>
+    </mitre>
+    <group>fortigate,botnet,malware,pci_dss_11.4,gdpr_IV_35.7.d,nist_800_53_SI.4,tsc_CC6.8,</group>
+  </rule> 
+
+  <!-- Malware traffic from foreign country blocked -->
+  <rule id="102122" level="3">
+    <if_sid>44618</if_sid>
+    <field name="srccountry" negate="yes">^Reserved$|^India$</field>
+    <description>FortiGate: Malware traffic from foreign country blocked by antivirus</description>
+    <mitre>
+      <id>T1566</id>
+      <id>T1204</id>
+    </mitre>
+    <group>fortigate,malware,antivirus,external_threat,pci_dss_5.1,gdpr_IV_35.7.d,nist_800_53_SI.3,tsc_CC6.8,</group>
+  </rule>
+  
+  <!-- Authenticatin Rules - Extension -->
+  
+  <!-- Admin login successfull after 5 failures login attempts -->
+  <rule id="102123" level="3">
+    <if_sid>102101</if_sid>
+    <field name="logid">0100032001</field>
+    <field name="subtype">system</field>
+    <description>FortiGate: CRITICAL - FortiGate: Admin authentication successful after 5 failure login attempts within 2 minues</description>
+  <mitre>
+    <id>T1078</id>
+    <id>T1110</id>
+    <id>T1539</id>
+  </mitre>
+  <group>account_compromise,privilege_escalation,brute_force_success,admin_breach,fortigate,critical_alert,pci_dss_10.2.4,pci_dss_10.2.5,gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_AC.2,nist_800_53_IA.8,tsc_CC6.1,tsc_CC7.2,</group>
+  </rule>
+  
+  <!-- ##########################   More rules based on security logs (UTM)   ########################## -->
+  
+  <!-- Malicious website access attempts -->
+  <rule id="102300" level="3">
+    <field name="type">utm</field>
+    <field name="subtype">webfilter</field>
+    <field name="catdesc">Malicious Websites</field>
+    <field name="crlevel">high</field>
+    <description>FortiGate: CRITICAL - Malicious website access blocked - $(srcip) attempted to access $(hostname) (Score: $(crscore))</description>
+    <mitre>
+      <id>T1566.002</id>
+      <id>T1589.002</id>
+    </mitre>
+    <group>malicious_websites,phishing,malware,fortigate,</group>
+  </rule>
+  
+  <!-- VPN/proxy service access attempts -->
+  <rule id="102301" level="10" frequency="3" timeframe="600">
+    <if_matched_sid>44622</if_matched_sid> <!-- To match type=utm -->
+    <field name="subtype">webfilter</field>
+    <field name="hostname">4dxvpn\.com|.*vpn.*|.*proxy.*</field>
+    <same_srcip />
+    <description>FortiGate: VPN/Proxy evasion attempts - $(srcip) repeatedly trying to access $(hostname)</description>
+    <mitre>
+      <id>T1090</id>
+      <id>T1562</id>
+    </mitre>
+    <group>vpn_evasion,proxy_services,bypass_attempts,</group>
+  </rule>
+  
+  <!-- IoT device external communications -->
+  <rule id="102302" level="8" frequency="5" timeframe="300">
+    <if_matched_sid>44622</if_matched_sid> <!-- To match type=utm -->
+    <field name="subtype">webfilter</field>
+    <field name="hostname">iot\.incsmartai\.com</field>
+    <same_srcip />
+    <description>FortiGate: IoT device beaconing - $(srcip) repeatedly connecting to IoT cloud service</description>
+    <mitre>
+      <id>T1071</id>
+      <id>T1048</id>
+    </mitre>
+    <group>iot_beaconing,device_communications,</group>
+  </rule>
+
+  <!-- Suspicious content management system access -->
+  <rule id="102303" level="7" frequency="10" timeframe="900">
+    <if_matched_sid>44622</if_matched_sid> <!-- To match type=utm -->
+    <field name="subtype">webfilter</field>
+    <match>ContentManager</match>
+    <same_dstip />
+    <description>FortiGate: Content management system scanning - Multiple access attempts to $(dstip)</description>
+    <mitre>
+      <id>T1595</id>
+      <id>T1210</id>
+    </mitre>
+    <group>application_scanning,cms_targeting,</group>
+  </rule>
+ 
+  <!-- Access attempts to high-risk countries -->
+  <rule id="102304" level="3">
+    <field name="type">utm</field>
+    <field name="subtype">webfilter</field>
+    <field name="dstcountry">Korea|China</field>
+    <action>blocked</action>
+    <description>FortiGate: High-risk country access - $(srcip) attempted connection to $(dstcountry)</description>
+    <mitre>
+      <id>T1078</id>
+     <id>T1583</id>
+    </mitre>
+    <group>high_risk_countries,geographic_threats,</group>
+  </rule>
+  
+  <!-- Suspicious user agent detection -->
+  <rule id="102305" level="3">
+    <field name="type">utm</field>
+    <field name="subtype">webfilter</field>
+    <field name="agent">Dalvik|ScriptXfer</field>
+    <action>blocked</action>
+    <description>FortiGate: Suspicious user agent - $(agent) from $(srcip) accessing $(hostname)</description>
+    <mitre>
+      <id>T1071.001</id>
+      <id>T1608</id>
+    </mitre>
+    <group>suspicious_user_agents,automated_tools,</group>
+  </rule>
+
+  <!-- Multiple category violations from same source -->
+  <rule id="102306" level="8" frequency="5" timeframe="1800">
+  <if_matched_sid>44622</if_matched_sid> <!-- To match type=utm -->
+    <field name="subtype">webfilter</field>
+    <action>blocked</action>
+    <same_srcip />
+    <same_field name="catdesc">different</same_field>
+    <description>FortiGate: Multiple category violations - $(srcip) blocked across $(frequency) different categories</description>
+    <mitre>
+      <id>T1562</id>
+      <id>T1595</id>
+    </mitre>
+    <group>multiple_violations,policy_evasion,</group>
+  </rule>
+
+  <!-- Unrated website mass access -->
+  <rule id="102307" level="6" frequency="20" timeframe="3600">
+    <if_matched_sid>44622</if_matched_sid> <!-- To match type=utm -->
+    <field name="subtype">webfilter</field>
+    <field name="catdesc">Unrated</field>
+    <same_srcip />
+    <description>FortiGate: Mass unrated website access - $(srcip) attempted $(frequency) unrated sites</description>
+    <group>unrated_sites,content_discovery,</group>
+  </rule>
+  
+    <!-- Possible tcp_syn_flood -->
+  <rule id="102308" level="10" frequency="50" timeframe="60">
+    <if_matched_sid>81630</if_matched_sid>
+    <field name="attack">tcp_syn_flood</field>
+    <field name="crlevel">critical</field>
+    <same_dstip />
+    <description>FortiGate: Sustained TCP SYN Flood detected against a destination host.</description>
+    <mitre>
+        <id>T1499</id> <!-- Endpoint Denial of Service -->
+    </mitre>
+    <group>fortigate,dos_attack,network_attack,availability_attack</group>
+  </rule>
+  
+  <!-- Multipel attack dropped events detected -->
+  <rule id="102309" level="12" frequency="10" timeframe="60">
+  <if_matched_sid>81629</if_matched_sid>
+  <description>Multipel attack dropped events detected</description>
+  <group>attack,gdpr_IV_35.7.d,hipaa_164.312.b,nist_800_53_AU.6,pci_dss_10.6.1,</group>
+  </rule>
+
+</group>
